@@ -31,12 +31,12 @@ jobs:
       - name: Download & Install Exness MT5 Terminal
         shell: powershell
         run: |
-          Write-Host "🚀 Downloading Exness MT5 Setup via Native Curl..." -ForegroundColor Green
+          Write-Host "🚀 Downloading Exness MT5 Setup via Insecure Curl (Bypassing Expired Cert)..." -ForegroundColor Green
           $url = "https://download.mql5.com/cdn/web/exness.technologies.ltd/mt5/exness5setup.exe"
           $output = "exness5setup.exe"
 
-          # Native curl bypasses .NET WebClient TLS/CDN socket resets
-          curl.exe -sSL --retry 3 --retry-delay 2 -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" $url -o $output
+          # -k / --insecure bypasses SEC_E_CERT_EXPIRED errors on host CDN
+          curl.exe -k -sSL --retry 3 --retry-delay 2 -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" $url -o $output
 
           if (Test-Path $output) {
               $fileSize = (Get-Item $output).Length / 1MB
