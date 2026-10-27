@@ -31,11 +31,21 @@ jobs:
       - name: Download & Install Exness MT5 Terminal
         shell: powershell
         run: |
-          Write-Host "Downloading Exness MT5 Setup..."
-          $url = "https://download.mql5.com/cdn/web/exness.technologies.ltd/mt5/exness5setup.exe"
-          Invoke-WebRequest -Uri $url -OutFile "exness5setup.exe"
+          # Force TLS 1.2 and bypass runner SSL certificate validation
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+          [System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}
 
-          Write-Host "Installing MetaTrader 5 silently..."
+          Write-Host "🚀 Downloading Exness MT5 Setup via TLS 1.2..."
+          $url = "https://download.mql5.com/cdn/web/exness.technologies.ltd/mt5/exness5setup.exe"
+          $output = "exness5setup.exe"
+
+          Invoke-WebRequest -Uri $url -OutFile $output -UseBasicParsing -UserAgent "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+
+          if (-not (Test-Path $output)) {
+              throw "❌ Download failed: exness5setup.exe was not created."
+          }
+
+          Write-Host "⚙️ Installing MetaTrader 5 silently..."
           Start-Process -FilePath ".\exness5setup.exe" -ArgumentList "/auto" -Wait
           Start-Sleep -Seconds 10
 
