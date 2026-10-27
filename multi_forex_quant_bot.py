@@ -3,8 +3,8 @@ Multi-Asset Proportional Risk Automation Engine (Exness MT5)
 
 Run modes
 ---------
-- Single cycle (default):      python multi_forex_quant_bot.py
-- Loop mode (e.g. 5h45m):      set LOOP_MINUTES=345 and run the same command.
+- Single cycle (default):     python multi_forex_quant_bot.py
+- Loop mode (e.g. 5h45m):     set LOOP_MINUTES=345 and run the same command.
   Loop mode connects to MT5 once and runs one cycle every 15 minutes,
   just after each M15 candle closes.
 
@@ -13,6 +13,7 @@ Required environment variables
 EXNESS_MT5_LOGIN, EXNESS_MT5_PASSWORD, EXNESS_MT5_SERVER
 Optional: FINNHUB_API_KEY, MT5_PATH, LOOP_MINUTES, MAX_SPREAD_PIPS, LOG_FILE
 """
+
 import csv
 import glob
 import math
@@ -34,7 +35,7 @@ if sys.platform == "win32":
         pass
 
 # ----------------------------------------------------------------------
-# 1. Credentials & Configuration (Demo Hardcoded Fallbacks)
+# 1. Credentials & Configuration (Environment & Secure Fallbacks)
 # ----------------------------------------------------------------------
 raw_login = os.environ.get("EXNESS_MT5_LOGIN", "81908274").strip()
 MT5_LOGIN = int(raw_login) if raw_login.isdigit() else 81908274
@@ -46,7 +47,7 @@ MT5_SERVER = os.environ.get("EXNESS_MT5_SERVER", "Exness-MT5Trial10").strip()
 if not MT5_SERVER:
     MT5_SERVER = "Exness-MT5Trial10"
 
-NEWS_API_KEY = os.environ.get("FINNHUB_API_KEY", "dbcbqbhr01qioil6nl50dbcbqbhr01qioil6nl5g").strip()
+NEWS_API_KEY = os.environ.get("FINNHUB_API_KEY", "").strip()
 
 BASKET_PAIRS = ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "USDCHF"]
 
@@ -61,12 +62,12 @@ MAGIC_NUMBER = 1008274
 LOG_FILE = os.environ.get("LOG_FILE", "trade_log.csv")
 LOOP_MINUTES = int(os.environ.get("LOOP_MINUTES", "0") or 0)
 
-# Remembers the last candle we acted on per symbol
+# Remembers the last candle acted on per symbol
 _last_signal_bar = {}
 
 
 # ----------------------------------------------------------------------
-# 2. Logging
+# 2. Logging Routine
 # ----------------------------------------------------------------------
 def log_event(**row):
     """Appends one row to the CSV log."""
