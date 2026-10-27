@@ -11,7 +11,8 @@ Run modes
 Required environment variables
 ------------------------------
 EXNESS_MT5_LOGIN, EXNESS_MT5_PASSWORD, EXNESS_MT5_SERVER
-Optional: FINNHUB_API_KEY, MT5_PATH, LOOP_MINUTES, MAX_SPREAD_PIPS, LOG_FILE
+Optional: FINNHUB_API_KEY, MT5_PATH, LOOP_MINUTES, MAX_SPREAD_PIPS, LOG_FILE,
+          TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 """
 
 import csv
@@ -49,6 +50,10 @@ if not MT5_SERVER:
 
 NEWS_API_KEY = os.environ.get("FINNHUB_API_KEY", "").strip()
 
+# Telegram Alert Configuration
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
+TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
+
 BASKET_PAIRS = ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "USDCHF"]
 
 BASE_LOT_PER_1000_EQUITY = 0.01   # 0.01 lots per $1,000 equity
@@ -67,7 +72,26 @@ _last_signal_bar = {}
 
 
 # ----------------------------------------------------------------------
-# 2. Logging Routine
+# 2. Telegram Notification Helper
+# ----------------------------------------------------------------------
+def send_telegram_alert(message: str):
+    """Sends immediate operational alert to user phone via Telegram Bot API."""
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+        return
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    payload = {
+        "chat_id": TELEGRAM_CHAT_ID,
+        "text": message,
+        "parse_mode": "Markdown"
+    }
+    try:
+        requests.post(url, json=payload, timeout=5)
+    except Exception as e:
+        print(f"  [WARN] Failed to send Telegram alert: {e}")
+
+
+# ----------------------------------------------------------------------
+# 3. Logging Routine
 # ----------------------------------------------------------------------
 def log_event(**row):
     """Appends one row to the CSV log."""
@@ -85,7 +109,7 @@ def log_event(**row):
 
 
 # ----------------------------------------------------------------------
-# 3. MT5 Terminal Connection
+# 4. MT5 Terminal Connection
 # ----------------------------------------------------------------------
 def find_terminal_path():
     """Finds terminal64.exe: MT5_PATH env var, known locations, then a search."""
@@ -120,8 +144,7 @@ def connect_mt5(retries=5, wait=15) -> bool:
             term = mt5.terminal_info()
             acct = mt5.account_info()
             if term is not None and not term.trade_allowed:
-                print("[WARN] Algo/Auto trading is DISABLED in the terminal. "
-                      "Orders will be rejected (retcode 10027) until it is enabled.")
+                print("[WARN] Algo/Auto trading is DISABLED in the terminal.")
             if acct is not None and not acct.trade_allowed:
                 print("[WARN] Trading is not allowed on this account.")
             return True
@@ -145,7 +168,7 @@ def ensure_connection() -> bool:
 
 
 # ----------------------------------------------------------------------
-# 4. Macro News Filter (Finnhub)
+# 5. Macro News Filter (Finnhub)
 # ----------------------------------------------------------------------
 def is_news_blackout_active() -> tuple[bool, str]:
     if not NEWS_API_KEY:
@@ -181,7 +204,9 @@ def is_news_blackout_active() -> tuple[bool, str]:
                 continue
             minutes_away = abs((event_dt - now_utc).total_seconds()) / 60.0
             if minutes_away <= NEWS_BLACKOUT_MINUTES:
-                return True, f"High-impact event ({country}: {event.get('event', 'News')}) at {event_time_str} UTC"
+                msg = f"High-impact event ({country}: {event.get('event', 'News')}) at {event_time_str} UTC"
+                send_telegram_alert(f"⚠️ *NEWS BLACKOUT ACTIVE*\n{msg}")
+                return True, msg
 
         return False, "Clear"
     except Exception as e:
@@ -189,7 +214,7 @@ def is_news_blackout_active() -> tuple[bool, str]:
 
 
 # ----------------------------------------------------------------------
-# 5. Symbols, Sizing & Signal Engine
+# 6. Symbols, Sizing & Signal Engine
 # ----------------------------------------------------------------------
 def resolve_exness_symbol(base_pair: str) -> str:
     if mt5.symbol_info(base_pair) is not None:
@@ -241,7 +266,7 @@ def evaluate_market_signal(symbol: str):
 
 
 # ----------------------------------------------------------------------
-# 6. Order Execution
+# 7. Order Execution
 # ----------------------------------------------------------------------
 def pick_filling_mode(info) -> int:
     modes = info.filling_mode
@@ -290,26 +315,43 @@ def execute_market_order(symbol: str, order_type: str, base_lots: float) -> bool
     }
 
     result = mt5.order_send(request)
-    if result is None:
-        print(f"  [FAIL] No response from MT5 for {symbol}: {mt5.last_error()}")
-        log_event(symbol=symbol, signal=order_type, price=price, lots=lots, sl=sl, tp=tp, result="no_response")
-        return False
-
-    if result.retcode != mt5.TRADE_RETCODE_DONE:
-        print(f"  [FAIL] Order rejected for {symbol}: retcode {result.retcode} ({result.comment})")
+    if result is None or result.retcode != mt5.TRADE_RETCODE_DONE:
+        ret_code = result.retcode if result else "NO_RESPONSE"
+        comment = result.comment if result else mt5.last_error()
+        print(f"  [FAIL] Order rejected for {symbol}: retcode {ret_code} ({comment})")
         log_event(symbol=symbol, signal=order_type, price=price, lots=lots, sl=sl, tp=tp,
-                  result=f"rejected_{result.retcode}")
+                  result=f"rejected_{ret_code}")
+        
+        # Telegram Alert for Order Rejection
+        send_telegram_alert(
+            f"❌ *ORDER REJECTED*\n"
+            f"*Symbol:* {symbol}\n"
+            f"*Signal:* {order_type}\n"
+            f"*Error Code:* {ret_code}\n"
+            f"*Reason:* {comment}"
+        )
         return False
 
     print(f"  [ORDER PLACED] {order_type} {lots} lots {symbol} @ {price:.5f} | "
           f"SL {sl:.5f} | TP {tp:.5f} (ticket #{result.order})")
     log_event(symbol=symbol, signal=order_type, price=price, lots=lots, sl=sl, tp=tp,
               result="filled", ticket=result.order)
+
+    # Telegram Alert for Order Execution
+    send_telegram_alert(
+        f"🚀 *ORDER EXECUTED*\n"
+        f"*Symbol:* {symbol}\n"
+        f"*Side:* {order_type}\n"
+        f"*Volume:* {lots} lots\n"
+        f"*Price:* {price:.5f}\n"
+        f"*SL:* {sl:.5f} | *TP:* {tp:.5f}\n"
+        f"*Ticket:* `#{result.order}`"
+    )
     return True
 
 
 # ----------------------------------------------------------------------
-# 7. One Trading Cycle
+# 8. One Trading Cycle
 # ----------------------------------------------------------------------
 def run_cycle():
     timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
@@ -317,7 +359,6 @@ def run_cycle():
     print(f"[{timestamp} UTC] Multi-Asset Proportional Risk Engine (Exness MT5)")
     print("=" * 66)
 
-    # Auto-initialize trade_log.csv on cycle start so artifact upload always succeeds
     log_event(symbol="SYSTEM", signal="INIT", result="cycle_executed")
 
     is_news, news_msg = is_news_blackout_active()
@@ -388,7 +429,7 @@ def run_cycle():
 
 
 # ----------------------------------------------------------------------
-# 8. Entry Point
+# 9. Entry Point
 # ----------------------------------------------------------------------
 def seconds_until_next_candle(buffer_seconds=5) -> float:
     now = datetime.now(timezone.utc)
