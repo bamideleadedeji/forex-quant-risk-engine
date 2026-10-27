@@ -31,25 +31,18 @@ jobs:
       - name: Download & Install Exness MT5 Terminal
         shell: powershell
         run: |
-          # Enforce TLS 1.2 Protocol Execution & Bypass Certificate Validation
-          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-          [System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}
-
-          Write-Host "🚀 Downloading Exness MT5 Setup via TLS 1.2..." -ForegroundColor Green
+          Write-Host "🚀 Downloading Exness MT5 Setup via Native Curl..." -ForegroundColor Green
           $url = "https://download.mql5.com/cdn/web/exness.technologies.ltd/mt5/exness5setup.exe"
           $output = "exness5setup.exe"
 
-          try {
-              Invoke-WebRequest -Uri $url -OutFile $output -UseBasicParsing -UserAgent "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
-              
-              if (Test-Path $output) {
-                  $fileSize = (Get-Item $output).Length / 1MB
-                  Write-Host ("✅ Download Complete: {0:N2} MB verified." -f $fileSize) -ForegroundColor Green
-              } else {
-                  throw "❌ Download failed: exness5setup.exe was not created."
-              }
-          } catch {
-              Write-Error ("❌ Download Failure: {0}" -f $_.Exception.Message)
+          # Native curl bypasses .NET WebClient TLS/CDN socket resets
+          curl.exe -sSL --retry 3 --retry-delay 2 -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" $url -o $output
+
+          if (Test-Path $output) {
+              $fileSize = (Get-Item $output).Length / 1MB
+              Write-Host ("✅ Download Complete: {0:N2} MB verified." -f $fileSize) -ForegroundColor Green
+          } else {
+              Write-Error "❌ Download failed: exness5setup.exe was not generated."
               exit 1
           }
 
