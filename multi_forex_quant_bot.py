@@ -38,11 +38,11 @@ if sys.platform == "win32":
 # ----------------------------------------------------------------------
 # 1. Credentials & Configuration (Environment & Secure Fallbacks)
 # ----------------------------------------------------------------------
-raw_login = os.environ.get("EXNESS_MT5_LOGIN", "81908274").strip()
-MT5_LOGIN = int(raw_login) if raw_login.isdigit() else 81908274
-MT5_PASSWORD = os.environ.get("EXNESS_MT5_PASSWORD", "9Xx_6CDvS8TBXhG").strip()
+raw_login = os.environ.get("EXNESS_MT5_LOGIN", "81908061").strip()
+MT5_LOGIN = int(raw_login) if raw_login.isdigit() else 81908061
+MT5_PASSWORD = os.environ.get("EXNESS_MT5_PASSWORD", "T3xy*B7@(PgfG").strip()
 if not MT5_PASSWORD:
-    MT5_PASSWORD = "9Xx_6CDvS8TBXhG"
+    MT5_PASSWORD = "T3xy*B7@(Pgf"
 
 MT5_SERVER = os.environ.get("EXNESS_MT5_SERVER", "Exness-MT5Trial10").strip()
 if not MT5_SERVER:
