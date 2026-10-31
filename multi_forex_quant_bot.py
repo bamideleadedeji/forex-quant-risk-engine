@@ -1,20 +1,7 @@
 """
 Multi-Asset Proportional Risk Automation Engine (Exness MT5)
-
-Run modes
----------
-- Single cycle (default):     python multi_forex_quant_bot.py
-- Loop mode (e.g. 5h45m):     set LOOP_MINUTES=345 and run the same command.
-  Loop mode connects to MT5 once and runs one cycle every 15 minutes,
-  just after each M15 candle closes.
-
-Required environment variables
-------------------------------
-EXNESS_MT5_LOGIN, EXNESS_MT5_PASSWORD, EXNESS_MT5_SERVER
-Optional: FINNHUB_API_KEY, MT5_PATH, LOOP_MINUTES, MAX_SPREAD_PIPS, LOG_FILE,
-          TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
+Complete Production Version (Fail-Safe News Protection)
 """
-
 import csv
 import glob
 import math
@@ -27,7 +14,7 @@ import MetaTrader5 as mt5
 import pandas as pd
 import requests
 
-# Force UTF-8 encoding for Windows console / GitHub Actions runners
+# Force UTF-8 encoding for Windows console
 if sys.platform == "win32":
     try:
         sys.stdout.reconfigure(encoding="utf-8")
@@ -36,23 +23,14 @@ if sys.platform == "win32":
         pass
 
 # ----------------------------------------------------------------------
-# 1. Credentials & Configuration (Environment & Secure Fallbacks)
+# 1. Credentials & Configuration
 # ----------------------------------------------------------------------
-raw_login = os.environ.get("EXNESS_MT5_LOGIN", "81908061").strip()
-MT5_LOGIN = int(raw_login) if raw_login.isdigit() else 81908061
-MT5_PASSWORD = os.environ.get("EXNESS_MT5_PASSWORD", "T3xy*B7@(PgfG").strip()
-if not MT5_PASSWORD:
-    MT5_PASSWORD = "T3xy*B7@(Pgf"
-
-MT5_SERVER = os.environ.get("EXNESS_MT5_SERVER", "Exness-MT5Trial10").strip()
-if not MT5_SERVER:
-    MT5_SERVER = "Exness-MT5Trial10"
+MT5_LOGIN = 81908061
+MT5_PASSWORD = "T3xy*B7@(Pgf"
+MT5_SERVER = "Exness-MT5Trial10"
+MAGIC_NUMBER = 1008061
 
 NEWS_API_KEY = os.environ.get("FINNHUB_API_KEY", "").strip()
-
-# Telegram Alert Configuration
-TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
-TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
 
 BASKET_PAIRS = ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "USDCHF"]
 
@@ -63,35 +41,15 @@ MAX_SPREAD_PIPS = float(os.environ.get("MAX_SPREAD_PIPS", "2.0"))
 
 SL_PIPS = 20.0
 TP_PIPS = 40.0
-MAGIC_NUMBER = 1008274
 LOG_FILE = os.environ.get("LOG_FILE", "trade_log.csv")
 LOOP_MINUTES = int(os.environ.get("LOOP_MINUTES", "0") or 0)
 
-# Remembers the last candle acted on per symbol
+# Remembers the last candle we acted on per symbol to avoid duplicate orders
 _last_signal_bar = {}
 
 
 # ----------------------------------------------------------------------
-# 2. Telegram Notification Helper
-# ----------------------------------------------------------------------
-def send_telegram_alert(message: str):
-    """Sends immediate operational alert to user phone via Telegram Bot API."""
-    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
-        return
-    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-    payload = {
-        "chat_id": TELEGRAM_CHAT_ID,
-        "text": message,
-        "parse_mode": "Markdown"
-    }
-    try:
-        requests.post(url, json=payload, timeout=5)
-    except Exception as e:
-        print(f"  [WARN] Failed to send Telegram alert: {e}")
-
-
-# ----------------------------------------------------------------------
-# 3. Logging Routine
+# 2. Logging
 # ----------------------------------------------------------------------
 def log_event(**row):
     """Appends one row to the CSV log."""
@@ -109,7 +67,7 @@ def log_event(**row):
 
 
 # ----------------------------------------------------------------------
-# 4. MT5 Terminal Connection
+# 3. MT5 Terminal Connection
 # ----------------------------------------------------------------------
 def find_terminal_path():
     """Finds terminal64.exe: MT5_PATH env var, known locations, then a search."""
@@ -144,7 +102,7 @@ def connect_mt5(retries=5, wait=15) -> bool:
             term = mt5.terminal_info()
             acct = mt5.account_info()
             if term is not None and not term.trade_allowed:
-                print("[WARN] Algo/Auto trading is DISABLED in the terminal.")
+                print("[WARN] Algo/Auto trading is DISABLED in the terminal. Orders will be rejected.")
             if acct is not None and not acct.trade_allowed:
                 print("[WARN] Trading is not allowed on this account.")
             return True
@@ -156,7 +114,7 @@ def connect_mt5(retries=5, wait=15) -> bool:
 
 
 def ensure_connection() -> bool:
-    """Reconnects if the terminal connection dropped (used in loop mode)."""
+    """Reconnects if the terminal connection dropped."""
     try:
         if mt5.terminal_info() is not None and mt5.account_info() is not None:
             return True
@@ -168,11 +126,16 @@ def ensure_connection() -> bool:
 
 
 # ----------------------------------------------------------------------
-# 5. Macro News Filter (Finnhub)
+# 4. Macro News Filter (FAIL-SAFE / FAIL-CLOSED PROTECTION)
 # ----------------------------------------------------------------------
 def is_news_blackout_active() -> tuple[bool, str]:
+    """
+    Checks economic calendar. FAILS CLOSED: If API key is missing or feed 
+    fails, trading is locked down to protect capital against news spikes.
+    """
     if not NEWS_API_KEY:
-        return False, "News filter skipped (no FINNHUB_API_KEY)"
+        return True, "News filter active-lock: No FINNHUB_API_KEY provided (Fail-Closed protection)"
+        
     try:
         now_utc = datetime.now(timezone.utc)
         start_date = (now_utc - timedelta(minutes=NEWS_BLACKOUT_MINUTES)).strftime("%Y-%m-%d")
@@ -185,7 +148,7 @@ def is_news_blackout_active() -> tuple[bool, str]:
             timeout=8,
         )
         if res.status_code != 200:
-            return False, f"News feed unavailable (HTTP {res.status_code}); filter skipped"
+            return True, f"News feed unavailable (HTTP {res.status_code}); trading locked for safety"
 
         events = res.json().get("economicCalendar", [])
         major_countries = {"US", "EU", "GB", "JP", "AU", "CA", "CH", "DE"}
@@ -204,19 +167,18 @@ def is_news_blackout_active() -> tuple[bool, str]:
                 continue
             minutes_away = abs((event_dt - now_utc).total_seconds()) / 60.0
             if minutes_away <= NEWS_BLACKOUT_MINUTES:
-                msg = f"High-impact event ({country}: {event.get('event', 'News')}) at {event_time_str} UTC"
-                send_telegram_alert(f"⚠️ *NEWS BLACKOUT ACTIVE*\n{msg}")
-                return True, msg
+                return True, f"High-impact event ({country}: {event.get('event', 'News')}) at {event_time_str} UTC"
 
-        return False, "Clear"
+        return False, "Clear (No high-impact news within window)"
     except Exception as e:
-        return False, f"News feed note: {e}; filter skipped"
+        return True, f"News feed error: {e}; trading locked for safety"
 
 
 # ----------------------------------------------------------------------
-# 6. Symbols, Sizing & Signal Engine
+# 5. Symbols, Sizing & Signal Engine
 # ----------------------------------------------------------------------
 def resolve_exness_symbol(base_pair: str) -> str:
+    """Finds the account's symbol name (e.g. EURUSD, EURUSDm)."""
     if mt5.symbol_info(base_pair) is not None:
         mt5.symbol_select(base_pair, True)
         return base_pair
@@ -266,7 +228,7 @@ def evaluate_market_signal(symbol: str):
 
 
 # ----------------------------------------------------------------------
-# 7. Order Execution
+# 6. Order Execution
 # ----------------------------------------------------------------------
 def pick_filling_mode(info) -> int:
     modes = info.filling_mode
@@ -315,43 +277,23 @@ def execute_market_order(symbol: str, order_type: str, base_lots: float) -> bool
     }
 
     result = mt5.order_send(request)
-    if result is None or result.retcode != mt5.TRADE_RETCODE_DONE:
-        ret_code = result.retcode if result else "NO_RESPONSE"
-        comment = result.comment if result else mt5.last_error()
-        print(f"  [FAIL] Order rejected for {symbol}: retcode {ret_code} ({comment})")
-        log_event(symbol=symbol, signal=order_type, price=price, lots=lots, sl=sl, tp=tp,
-                  result=f"rejected_{ret_code}")
-        
-        # Telegram Alert for Order Rejection
-        send_telegram_alert(
-            f"❌ *ORDER REJECTED*\n"
-            f"*Symbol:* {symbol}\n"
-            f"*Signal:* {order_type}\n"
-            f"*Error Code:* {ret_code}\n"
-            f"*Reason:* {comment}"
-        )
+    if result is None:
+        print(f"  [FAIL] No response from MT5 for {symbol}: {mt5.last_error()}")
+        log_event(symbol=symbol, signal=order_type, price=price, lots=lots, sl=sl, tp=tp, result="no_response")
         return False
 
-    print(f"  [ORDER PLACED] {order_type} {lots} lots {symbol} @ {price:.5f} | "
-          f"SL {sl:.5f} | TP {tp:.5f} (ticket #{result.order})")
-    log_event(symbol=symbol, signal=order_type, price=price, lots=lots, sl=sl, tp=tp,
-              result="filled", ticket=result.order)
+    if result.retcode != mt5.TRADE_RETCODE_DONE:
+        print(f"  [FAIL] Order rejected for {symbol}: retcode {result.retcode} ({result.comment})")
+        log_event(symbol=symbol, signal=order_type, price=price, lots=lots, sl=sl, tp=tp, result=f"rejected_{result.retcode}")
+        return False
 
-    # Telegram Alert for Order Execution
-    send_telegram_alert(
-        f"🚀 *ORDER EXECUTED*\n"
-        f"*Symbol:* {symbol}\n"
-        f"*Side:* {order_type}\n"
-        f"*Volume:* {lots} lots\n"
-        f"*Price:* {price:.5f}\n"
-        f"*SL:* {sl:.5f} | *TP:* {tp:.5f}\n"
-        f"*Ticket:* `#{result.order}`"
-    )
+    print(f"  [ORDER PLACED] {order_type} {lots} lots {symbol} @ {price:.5f} | SL {sl:.5f} | TP {tp:.5f} (ticket #{result.order})")
+    log_event(symbol=symbol, signal=order_type, price=price, lots=lots, sl=sl, tp=tp, result="filled", ticket=result.order)
     return True
 
 
 # ----------------------------------------------------------------------
-# 8. One Trading Cycle
+# 7. One Trading Cycle
 # ----------------------------------------------------------------------
 def run_cycle():
     timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
@@ -359,12 +301,11 @@ def run_cycle():
     print(f"[{timestamp} UTC] Multi-Asset Proportional Risk Engine (Exness MT5)")
     print("=" * 66)
 
-    log_event(symbol="SYSTEM", signal="INIT", result="cycle_executed")
-
     is_news, news_msg = is_news_blackout_active()
     print(f"• News filter: {news_msg}")
     if is_news:
-        print("[HOLD] News volatility protection active. No new trades this cycle.")
+        print("[HOLD] News protection active (Fail-Closed). No new trades this cycle.")
+        log_event(symbol="SYSTEM", signal="HOLD", result="news_blackout_active")
         return
 
     account = mt5.account_info()
@@ -386,7 +327,7 @@ def run_cycle():
     print("-" * 66)
 
     if open_count >= MAX_CONCURRENT_OPEN_TRADES:
-        print("[HOLD] Max concurrent trades reached. Positions exit via SL/TP.")
+        print("[HOLD] Max concurrent trades reached.")
         return
 
     print("FX basket quotes & signals:")
@@ -396,13 +337,12 @@ def run_cycle():
         info = mt5.symbol_info(symbol)
 
         if tick is None or info is None:
-            print(f"  └─ {symbol:<8} | Quote unavailable (market closed or symbol inactive)")
+            print(f"  └─ {symbol:<8} | Quote unavailable")
             continue
 
         spread_pips = round((tick.ask - tick.bid) / pip_size(info), 1)
         signal, bar_time = evaluate_market_signal(symbol)
-        print(f"  └─ {symbol:<8} | Bid: {tick.bid:<9.5f} | Ask: {tick.ask:<9.5f} | "
-              f"Spread: {spread_pips:>4.1f} pips | Signal: {signal}")
+        print(f"  └─ {symbol:<8} | Bid: {tick.bid:<9.5f} | Ask: {tick.ask:<9.5f} | Spread: {spread_pips:>4.1f} pips | Signal: {signal}")
 
         if signal not in ("BUY", "SELL"):
             continue
@@ -411,12 +351,10 @@ def run_cycle():
         if bar_time is not None and _last_signal_bar.get(symbol) == bar_time:
             continue
         if spread_pips > MAX_SPREAD_PIPS:
-            print(f"     [SKIP] Spread {spread_pips} pips exceeds limit {MAX_SPREAD_PIPS}.")
-            log_event(symbol=symbol, signal=signal, result=f"skipped_spread_{spread_pips}")
+            print(f"     [SKIP] Spread {spread_pips} pips exceeds limit.")
             continue
         if open_count >= MAX_CONCURRENT_OPEN_TRADES:
-            print(f"     [HOLD] Max trades reached. Skipping {symbol}.")
-            continue
+            break
 
         if execute_market_order(symbol, signal, base_lots):
             open_count += 1
@@ -429,7 +367,7 @@ def run_cycle():
 
 
 # ----------------------------------------------------------------------
-# 9. Entry Point
+# 8. Entry Point
 # ----------------------------------------------------------------------
 def seconds_until_next_candle(buffer_seconds=5) -> float:
     now = datetime.now(timezone.utc)
