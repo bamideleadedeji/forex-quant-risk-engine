@@ -125,9 +125,6 @@ def ensure_connection() -> bool:
 # 4. Fail-Safe Macro News Guard
 # ----------------------------------------------------------------------
 def is_news_blackout_active() -> tuple[bool, str]:
-    """
-    FAIL-SAFE DESIGN: If Finnhub API key is missing or feed fails, defaults to Open.
-    """
     if not NEWS_API_KEY:
         return False, "News filter bypass: No FINNHUB_API_KEY provided (Fail-Open active)"
         
@@ -223,7 +220,7 @@ def calculate_proportional_lots(equity: float) -> float:
 
 
 # ----------------------------------------------------------------------
-# 7. Multi-Timeframe Cascade Signal Engine (Gold M1 -> M5 -> M15)
+# 7. Asset-Optimized Signal Cascade Engine
 # ----------------------------------------------------------------------
 def compute_signal_on_timeframe(symbol: str, timeframe):
     rates = mt5.copy_rates_from_pos(symbol, timeframe, 0, 100)
@@ -259,23 +256,22 @@ def compute_signal_on_timeframe(symbol: str, timeframe):
 
 def evaluate_market_signal(symbol: str):
     """
-    Gold Cascade Strategy:
-    1. Check M1 (1-minute) first.
-    2. If NEUTRAL, check M5 (5-minute).
-    3. If NEUTRAL, check M15 (15-minute).
-    Forex pairs check M15 directly.
+    Asset-Optimized Routing:
+    - Gold (XAUUSDm): Fast M1 -> M5 cascade for instant scalping.
+    - Forex Pairs: Reliable M15 -> M30 cascade for stable trend execution.
     """
     if "XAU" in symbol.upper():
-        # Cascade: M1 -> M5 -> M15
-        for tf_name, tf in [("M1", mt5.TIMEFRAME_M1), ("M5", mt5.TIMEFRAME_M5), ("M15", mt5.TIMEFRAME_M15)]:
+        for tf_name, tf in [("M1", mt5.TIMEFRAME_M1), ("M5", mt5.TIMEFRAME_M5)]:
             sig, b_time, c_close = compute_signal_on_timeframe(symbol, tf)
             if sig in ("BUY", "SELL"):
                 return f"{sig} ({tf_name})", b_time, c_close
         return "NEUTRAL", None, 0.0
     else:
-        # Standard Forex on M15
-        sig, b_time, c_close = compute_signal_on_timeframe(symbol, mt5.TIMEFRAME_M15)
-        return sig, b_time, c_close
+        for tf_name, tf in [("M15", mt5.TIMEFRAME_M15), ("M30", mt5.TIMEFRAME_M30)]:
+            sig, b_time, c_close = compute_signal_on_timeframe(symbol, tf)
+            if sig in ("BUY", "SELL"):
+                return f"{sig} ({tf_name})", b_time, c_close
+        return "NEUTRAL", None, 0.0
 
 
 # ----------------------------------------------------------------------
@@ -301,7 +297,6 @@ def execute_order(symbol: str, signal_raw: str, base_lots: float, gjr_vol: float
     lots = normalize_volume(base_lots, info)
     pip = pip_size(info)
 
-    # Clean signal string (e.g., "BUY (M1)" -> "BUY")
     order_type = "BUY" if "BUY" in signal_raw.upper() else "SELL"
 
     sl_pips = max(15.0, round(gjr_vol * 10000 * 1.5, 1))
@@ -436,7 +431,7 @@ def run_cycle():
 # ----------------------------------------------------------------------
 def seconds_until_next_candle(buffer_seconds=5) -> float:
     now = datetime.now(timezone.utc)
-    minutes_to_next = 1 - (now.minute % 1) # Scan every minute for fast M1 scalping
+    minutes_to_next = 1 - (now.minute % 1)
     nxt = (now + timedelta(minutes=minutes_to_next)).replace(second=0, microsecond=0)
     return max(1.0, (nxt - now).total_seconds() + buffer_seconds)
 
