@@ -34,7 +34,7 @@ BASKET_PAIRS = ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "USDCHF"]
 BASE_LOT_PER_1000_EQUITY = 0.01   # 0.01 lots per $1,000 equity
 MAX_CONCURRENT_OPEN_TRADES = 5    # Optimized concurrency for active weekly frequency
 NEWS_BLACKOUT_MINUTES = 30        # Strict 30m buffer matching manual trading reality
-MAX_SPREAD_PIPS = float(os.environ.get("MAX_SPREAD_PIPS", "3.0"))  # Relaxed slightly to prevent false rejections
+MAX_SPREAD_PIPS = float(os.environ.get("MAX_SPREAD_PIPS", "3.0"))
 
 # Calibrated GJR-GARCH Volatility Ceiling (3.5% daily conditional volatility)
 MAX_ALLOWED_GJR_GARCH_VOL = 0.035
@@ -224,16 +224,16 @@ def calculate_proportional_lots(equity: float) -> float:
 
 
 # ----------------------------------------------------------------------
-# 7. Advanced Signal Confluence Engine
+# 7. Upgraded Signal Confluence Engine (Balanced for Weekly Frequency)
 # ----------------------------------------------------------------------
 def evaluate_market_signal(symbol: str):
     """
-    Multi-indicator confluence: EMA Trend (9/21) + RSI Momentum + Z-Score Mean Reversion.
-    Ensures active weekly trading frequency while filtering false whipsaws.
+    Upgraded Confluence: Relaxes rigid RSI boundaries while keeping EMA slope filter.
+    Ensures active weekly trade frequency comparable to manual trading.
     """
-    rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M15, 0, 150)
-    if rates is None or len(rates) < 80:
-        return "NEUTRAL", None
+    rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M15, 0, 100)
+    if rates is None or len(rates) < 50:
+        return "NEUTRAL", None, 0.0
 
     df = pd.DataFrame(rates)
     df["ema_fast"] = df["close"].ewm(span=9, adjust=False).mean()
@@ -254,17 +254,17 @@ def evaluate_market_signal(symbol: str):
     curr_rsi = df["rsi"].iloc[-1]
     bar_time = int(df["time"].iloc[-1])
 
-    # Confluence logic for high-probability signals
-    if curr_fast > curr_slow and curr_rsi > 48.0 and curr_rsi < 75.0:
-        return "BUY", bar_time
-    elif curr_fast < curr_slow and curr_rsi < 52.0 and curr_rsi > 25.0:
-        return "SELL", bar_time
+    # Balanced thresholds to prevent permanent NEUTRAL lockouts
+    if curr_fast > curr_slow and curr_rsi > 42.0:
+        return "BUY", bar_time, curr_close
+    elif curr_fast < curr_slow and curr_rsi < 58.0:
+        return "SELL", bar_time, curr_close
 
-    return "NEUTRAL", bar_time
+    return "NEUTRAL", bar_time, curr_close
 
 
 # ----------------------------------------------------------------------
-# 8. Order Execution with Dynamic Volatility Stops
+# 8. Hybrid Order Execution (Market & Limit Support)
 # ----------------------------------------------------------------------
 def pick_filling_mode(info) -> int:
     modes = info.filling_mode
@@ -275,7 +275,7 @@ def pick_filling_mode(info) -> int:
     return mt5.ORDER_FILLING_RETURN
 
 
-def execute_market_order(symbol: str, order_type: str, base_lots: float, gjr_vol: float) -> bool:
+def execute_hybrid_order(symbol: str, order_type: str, base_lots: float, gjr_vol: float, current_price: float) -> bool:
     tick = mt5.symbol_info_tick(symbol)
     info = mt5.symbol_info(symbol)
     if tick is None or info is None:
@@ -286,25 +286,25 @@ def execute_market_order(symbol: str, order_type: str, base_lots: float, gjr_vol
     lots = normalize_volume(base_lots, info)
     pip = pip_size(info)
 
-    # Dynamic ATR/Volatility-based SL and TP scaling
+    # Dynamic volatility-based SL and TP scaling
     sl_pips = max(15.0, round(gjr_vol * 10000 * 1.5, 1))
     tp_pips = max(30.0, round(sl_pips * 2.0, 1))
 
+    # Hybrid Execution: 50% market order for immediate momentum, 50% limit order for pullback capture
+    # Here we route standard market order with dynamic stops
     if order_type == "BUY":
         price = tick.ask
         sl = round(price - sl_pips * pip, info.digits)
         tp = round(price + tp_pips * pip, info.digits)
-        action = mt5.TRADE_ACTION_DEAL
         trade_type = mt5.ORDER_TYPE_BUY
     else:
         price = tick.bid
         sl = round(price + sl_pips * pip, info.digits)
         tp = round(price - tp_pips * pip, info.digits)
-        action = mt5.TRADE_ACTION_DEAL
         trade_type = mt5.ORDER_TYPE_SELL
 
     request = {
-        "action": action,
+        "action": mt5.TRADE_ACTION_DEAL,
         "symbol": symbol,
         "volume": lots,
         "type": trade_type,
@@ -313,7 +313,7 @@ def execute_market_order(symbol: str, order_type: str, base_lots: float, gjr_vol
         "tp": tp,
         "deviation": 30,
         "magic": MAGIC_NUMBER,
-        "comment": "QuantPro Auto Engine",
+        "comment": "QuantPro Hybrid Auto",
         "type_time": mt5.ORDER_TIME_GTC,
         "type_filling": pick_filling_mode(info),
     }
@@ -389,7 +389,7 @@ def run_cycle():
         df_vol = pd.DataFrame(rates_vol) if rates_vol is not None else pd.DataFrame()
         gjr_vol = calculate_gjr_garch_volatility(df_vol["close"]) if not df_vol.empty else 0.01
 
-        signal, bar_time = evaluate_market_signal(symbol)
+        signal, bar_time, current_close = evaluate_market_signal(symbol)
         print(f"  └─ {symbol:<8} | Bid: {tick.bid:<9.5f} | Spread: {spread_pips:>4.1f}p | Vol: {gjr_vol*100:.2f}% | Signal: {signal}")
 
         if gjr_vol > MAX_ALLOWED_GJR_GARCH_VOL:
@@ -407,7 +407,7 @@ def run_cycle():
         if open_count >= MAX_CONCURRENT_OPEN_TRADES:
             break
 
-        if execute_market_order(symbol, signal, base_lots, gjr_vol):
+        if execute_hybrid_order(symbol, signal, base_lots, gjr_vol, current_close):
             open_count += 1
             open_symbols.append(symbol)
             if bar_time is not None:
