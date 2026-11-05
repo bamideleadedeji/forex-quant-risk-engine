@@ -29,11 +29,12 @@ MAGIC_NUMBER = 1008061
 
 NEWS_API_KEY = os.environ.get("FINNHUB_API_KEY", "dbjlpihr01qonjmerf9gdbjlpihr01qonjmerfa0").strip()
 
-BASKET_PAIRS = ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "USDCHF"]
+# Basket includes major forex pairs + Gold (XAUUSDm) for fast scalping
+BASKET_PAIRS = ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "USDCHF", "XAUUSDm"]
 
 BASE_LOT_PER_1000_EQUITY = 0.01   # 0.01 lots per $1,000 equity
-MAX_CONCURRENT_OPEN_TRADES = 5    # Optimized concurrency for active weekly frequency
-NEWS_BLACKOUT_MINUTES = 30        # Strict 30m buffer matching manual trading reality
+MAX_CONCURRENT_OPEN_TRADES = 5    # Optimized concurrency
+NEWS_BLACKOUT_MINUTES = 30        # Strict 30m news guard
 MAX_SPREAD_PIPS = float(os.environ.get("MAX_SPREAD_PIPS", "3.0"))
 
 # Calibrated GJR-GARCH Volatility Ceiling (3.5% daily conditional volatility)
@@ -125,11 +126,10 @@ def ensure_connection() -> bool:
 # ----------------------------------------------------------------------
 def is_news_blackout_active() -> tuple[bool, str]:
     """
-    FAIL-SAFE DESIGN: If Finnhub API key is missing or feed fails, logs a warning
-    and defaults to OPEN (Fail-Open) so the bot never suffers algorithmic starvation.
+    FAIL-SAFE DESIGN: If Finnhub API key is missing or feed fails, defaults to Open.
     """
     if not NEWS_API_KEY:
-        return False, "News filter bypass: No FINNHUB_API_KEY provided (Fail-Open active for continuous trading)"
+        return False, "News filter bypass: No FINNHUB_API_KEY provided (Fail-Open active)"
         
     try:
         now_utc = datetime.now(timezone.utc)
@@ -143,7 +143,7 @@ def is_news_blackout_active() -> tuple[bool, str]:
             timeout=8,
         )
         if res.status_code != 200:
-            return False, f"News feed unavailable (HTTP {res.status_code}); bypassing for continuous operation"
+            return False, f"News feed unavailable (HTTP {res.status_code}); bypassing"
 
         events = res.json().get("economicCalendar", [])
         major_countries = {"US", "EU", "GB", "JP", "AU", "CA", "CH", "DE"}
@@ -166,19 +166,18 @@ def is_news_blackout_active() -> tuple[bool, str]:
 
         return False, "Clear (No high-impact news within 30m window)"
     except Exception as e:
-        return False, f"News feed error: {e}; bypassing for continuous operation"
+        return False, f"News feed error: {e}; bypassing"
 
 
 # ----------------------------------------------------------------------
 # 5. Volatility Estimation (GJR-GARCH Approximation)
 # ----------------------------------------------------------------------
 def calculate_gjr_garch_volatility(price_series: pd.Series) -> float:
-    """Calculates conditional volatility incorporating asymmetric GJR-GARCH leverage effects."""
     try:
         log_returns = np.log(price_series / price_series.shift(1)).dropna() * 100.0
         omega = 0.02
         alpha = 0.05
-        gamma = 0.08  # Asymmetric leverage term for negative shocks
+        gamma = 0.08
         beta = 0.88
         
         variance = np.var(log_returns) if len(log_returns) > 0 else 0.1
@@ -189,7 +188,7 @@ def calculate_gjr_garch_volatility(price_series: pd.Series) -> float:
         daily_vol = math.sqrt(max(variance, 1e-6)) / 100.0
         return float(daily_vol)
     except Exception:
-        return 0.012  # Safe default fallback (1.2%)
+        return 0.012
 
 
 # ----------------------------------------------------------------------
@@ -224,14 +223,10 @@ def calculate_proportional_lots(equity: float) -> float:
 
 
 # ----------------------------------------------------------------------
-# 7. Upgraded Signal Confluence Engine (Balanced for Weekly Frequency)
+# 7. Multi-Timeframe Cascade Signal Engine (Gold M1 -> M5 -> M15)
 # ----------------------------------------------------------------------
-def evaluate_market_signal(symbol: str):
-    """
-    Upgraded Confluence: Relaxes rigid RSI boundaries while keeping EMA slope filter.
-    Ensures active weekly trade frequency comparable to manual trading.
-    """
-    rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M15, 0, 100)
+def compute_signal_on_timeframe(symbol: str, timeframe):
+    rates = mt5.copy_rates_from_pos(symbol, timeframe, 0, 100)
     if rates is None or len(rates) < 50:
         return "NEUTRAL", None, 0.0
 
@@ -254,7 +249,6 @@ def evaluate_market_signal(symbol: str):
     curr_rsi = df["rsi"].iloc[-1]
     bar_time = int(df["time"].iloc[-1])
 
-    # Balanced thresholds to prevent permanent NEUTRAL lockouts
     if curr_fast > curr_slow and curr_rsi > 42.0:
         return "BUY", bar_time, curr_close
     elif curr_fast < curr_slow and curr_rsi < 58.0:
@@ -263,8 +257,29 @@ def evaluate_market_signal(symbol: str):
     return "NEUTRAL", bar_time, curr_close
 
 
+def evaluate_market_signal(symbol: str):
+    """
+    Gold Cascade Strategy:
+    1. Check M1 (1-minute) first.
+    2. If NEUTRAL, check M5 (5-minute).
+    3. If NEUTRAL, check M15 (15-minute).
+    Forex pairs check M15 directly.
+    """
+    if "XAU" in symbol.upper():
+        # Cascade: M1 -> M5 -> M15
+        for tf_name, tf in [("M1", mt5.TIMEFRAME_M1), ("M5", mt5.TIMEFRAME_M5), ("M15", mt5.TIMEFRAME_M15)]:
+            sig, b_time, c_close = compute_signal_on_timeframe(symbol, tf)
+            if sig in ("BUY", "SELL"):
+                return f"{sig} ({tf_name})", b_time, c_close
+        return "NEUTRAL", None, 0.0
+    else:
+        # Standard Forex on M15
+        sig, b_time, c_close = compute_signal_on_timeframe(symbol, mt5.TIMEFRAME_M15)
+        return sig, b_time, c_close
+
+
 # ----------------------------------------------------------------------
-# 8. Hybrid Order Execution (Market & Limit Support)
+# 8. Order Execution Engine
 # ----------------------------------------------------------------------
 def pick_filling_mode(info) -> int:
     modes = info.filling_mode
@@ -275,23 +290,23 @@ def pick_filling_mode(info) -> int:
     return mt5.ORDER_FILLING_RETURN
 
 
-def execute_hybrid_order(symbol: str, order_type: str, base_lots: float, gjr_vol: float, current_price: float) -> bool:
+def execute_order(symbol: str, signal_raw: str, base_lots: float, gjr_vol: float, current_price: float) -> bool:
     tick = mt5.symbol_info_tick(symbol)
     info = mt5.symbol_info(symbol)
     if tick is None or info is None:
         print(f"  [FAIL] Unable to fetch market info for {symbol}")
-        log_event(symbol=symbol, signal=order_type, result="no_market_info")
+        log_event(symbol=symbol, signal=signal_raw, result="no_market_info")
         return False
 
     lots = normalize_volume(base_lots, info)
     pip = pip_size(info)
 
-    # Dynamic volatility-based SL and TP scaling
+    # Clean signal string (e.g., "BUY (M1)" -> "BUY")
+    order_type = "BUY" if "BUY" in signal_raw.upper() else "SELL"
+
     sl_pips = max(15.0, round(gjr_vol * 10000 * 1.5, 1))
     tp_pips = max(30.0, round(sl_pips * 2.0, 1))
 
-    # Hybrid Execution: 50% market order for immediate momentum, 50% limit order for pullback capture
-    # Here we route standard market order with dynamic stops
     if order_type == "BUY":
         price = tick.ask
         sl = round(price - sl_pips * pip, info.digits)
@@ -313,7 +328,7 @@ def execute_hybrid_order(symbol: str, order_type: str, base_lots: float, gjr_vol
         "tp": tp,
         "deviation": 30,
         "magic": MAGIC_NUMBER,
-        "comment": "QuantPro Hybrid Auto",
+        "comment": f"QuantPro {signal_raw}",
         "type_time": mt5.ORDER_TIME_GTC,
         "type_filling": pick_filling_mode(info),
     }
@@ -321,16 +336,16 @@ def execute_hybrid_order(symbol: str, order_type: str, base_lots: float, gjr_vol
     result = mt5.order_send(request)
     if result is None:
         print(f"  [FAIL] No response from MT5 for {symbol}: {mt5.last_error()}")
-        log_event(symbol=symbol, signal=order_type, price=price, lots=lots, sl=sl, tp=tp, result="no_response")
+        log_event(symbol=symbol, signal=signal_raw, price=price, lots=lots, sl=sl, tp=tp, result="no_response")
         return False
 
     if result.retcode != mt5.TRADE_RETCODE_DONE:
         print(f"  [FAIL] Order rejected for {symbol}: retcode {result.retcode} ({result.comment})")
-        log_event(symbol=symbol, signal=order_type, price=price, lots=lots, sl=sl, tp=tp, result=f"rejected_{result.retcode}")
+        log_event(symbol=symbol, signal=signal_raw, price=price, lots=lots, sl=sl, tp=tp, result=f"rejected_{result.retcode}")
         return False
 
     print(f"  [ORDER PLACED] {order_type} {lots} lots {symbol} @ {price:.5f} | SL {sl:.5f} | TP {tp:.5f} (ticket #{result.order})")
-    log_event(symbol=symbol, signal=order_type, price=price, lots=lots, sl=sl, tp=tp, result="filled", ticket=result.order)
+    log_event(symbol=symbol, signal=signal_raw, price=price, lots=lots, sl=sl, tp=tp, result="filled", ticket=result.order)
     return True
 
 
@@ -372,7 +387,7 @@ def run_cycle():
         print("[HOLD] Max concurrent trades reached.")
         return
 
-    print("FX basket quotes & volatility scans:")
+    print("FX & Gold basket quotes & multi-timeframe scans:")
     for base_pair in BASKET_PAIRS:
         symbol = resolve_exness_symbol(base_pair)
         tick = mt5.symbol_info_tick(symbol)
@@ -384,30 +399,29 @@ def run_cycle():
 
         spread_pips = round((tick.ask - tick.bid) / pip_size(info), 1)
         
-        # Calculate GJR-GARCH Volatility
         rates_vol = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M15, 0, 100)
         df_vol = pd.DataFrame(rates_vol) if rates_vol is not None else pd.DataFrame()
         gjr_vol = calculate_gjr_garch_volatility(df_vol["close"]) if not df_vol.empty else 0.01
 
-        signal, bar_time, current_close = evaluate_market_signal(symbol)
-        print(f"  └─ {symbol:<8} | Bid: {tick.bid:<9.5f} | Spread: {spread_pips:>4.1f}p | Vol: {gjr_vol*100:.2f}% | Signal: {signal}")
+        signal_raw, bar_time, current_close = evaluate_market_signal(symbol)
+        print(f"  └─ {symbol:<8} | Bid: {tick.bid:<9.5f} | Spread: {spread_pips:>4.1f}p | Vol: {gjr_vol*100:.2f}% | Signal: {signal_raw}")
 
         if gjr_vol > MAX_ALLOWED_GJR_GARCH_VOL:
-            print(f"     [SKIP] Volatility {gjr_vol*100:.2f}% exceeds ceiling ({MAX_ALLOWED_GJR_GARCH_VOL*100}%).")
+            print(f"     [SKIP] Volatility {gjr_vol*100:.2f}% exceeds ceiling.")
             continue
-        if signal not in ("BUY", "SELL"):
+        if "NEUTRAL" in signal_raw.upper():
             continue
         if symbol in open_symbols:
             continue
         if bar_time is not None and _last_signal_bar.get(symbol) == bar_time:
             continue
         if spread_pips > MAX_SPREAD_PIPS:
-            print(f"     [SKIP] Spread {spread_pips} pips exceeds limit ({MAX_SPREAD_PIPS}).")
+            print(f"     [SKIP] Spread {spread_pips} pips exceeds limit.")
             continue
         if open_count >= MAX_CONCURRENT_OPEN_TRADES:
             break
 
-        if execute_hybrid_order(symbol, signal, base_lots, gjr_vol, current_close):
+        if execute_order(symbol, signal_raw, base_lots, gjr_vol, current_close):
             open_count += 1
             open_symbols.append(symbol)
             if bar_time is not None:
@@ -422,7 +436,7 @@ def run_cycle():
 # ----------------------------------------------------------------------
 def seconds_until_next_candle(buffer_seconds=5) -> float:
     now = datetime.now(timezone.utc)
-    minutes_to_next = 15 - (now.minute % 15)
+    minutes_to_next = 1 - (now.minute % 1) # Scan every minute for fast M1 scalping
     nxt = (now + timedelta(minutes=minutes_to_next)).replace(second=0, microsecond=0)
     return max(1.0, (nxt - now).total_seconds() + buffer_seconds)
 
