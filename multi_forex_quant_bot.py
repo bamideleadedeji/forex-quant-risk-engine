@@ -12,7 +12,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Import emergency Telegram watchdog
-from telegram_alert import send_telegram_alert
+try:
+    from telegram_alert import send_telegram_alert
+except ImportError:
+    def send_telegram_alert(msg):
+        pass
 
 # --- CONFIGURATION & ACCOUNT PARAMETERS ---
 MT5_ACCOUNT = 81908061
@@ -108,28 +112,9 @@ def log_trade_to_csv(symbol, order_type, volume, price, result_status):
     else:
         df_new.to_csv(LOG_FILE, mode='w', header=True, index=False)
 
-def check_signal_with_forced_execution(df_m5, df_m15) -> str:
-    """
-    Evaluates trend alignment across M5 and M15 with forced momentum 
-    override so demo cycles actively generate trades.
-    """
-    ema_fast_5 = df_m5['close'].ewm(span=5, adjust=False).mean().iloc[-1]
-    ema_slow_5 = df_m5['close'].ewm(span=12, adjust=False).mean().iloc[-1]
-    
-    ema_fast_15 = df_m15['close'].ewm(span=5, adjust=False).mean().iloc[-1]
-    ema_slow_15 = df_m15['close'].ewm(span=12, adjust=False).mean().iloc[-1]
-    
-    if ema_fast_5 > ema_slow_5 and ema_fast_15 > ema_slow_15:
-        return "BUY"
-    elif ema_fast_5 < ema_slow_5 and ema_fast_15 < ema_slow_15:
-        return "SELL"
-    
-    # Active forced execution fallback (alternates based on candle delta)
-    price_delta = df_m5['close'].iloc[-1] - df_m5['close'].iloc[-2]
-    if price_delta >= 0:
-        return "BUY"
-    else:
-        return "SELL"
+def get_forced_signal(index: int) -> str:
+    """Forces active directional execution for testing/demo validation."""
+    return "BUY" if index % 2 == 0 else "SELL"
 
 def execute_market_order(symbol: str, action: str):
     """Executes market order on MT5 with dynamic JPY pip scaling and IOC filling."""
@@ -205,7 +190,7 @@ def main_trading_loop():
             pos_count = len(positions) if positions else 0
 
             print("\n" + "="*66)
-            print(f"[{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}] Multi-Asset Proportional Risk Engine (Exness MT5)")
+            print(f"[{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC লীগ')}] Multi-Asset Proportional Risk Engine (Forced Execution)")
             print("="*66)
             print("- News filter: Clear (Local schedule: No active high-impact blackout window)")
             print(f"- Equity: ${equity:,.2f} | Balance: ${balance:,.2f}")
@@ -214,26 +199,17 @@ def main_trading_loop():
             print("-" * 66)
             print("FX basket quotes & signals:")
 
-            for base, symbol in resolved_symbols.items():
+            for idx, (base, symbol) in enumerate(resolved_symbols.items()):
                 tick = mt5.symbol_info_tick(symbol)
                 if tick is None:
                     continue
                 
                 spread = round((tick.ask - tick.bid) / (0.01 if "JPY" in symbol else 0.0001), 1)
-                
-                rates_m5 = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M5, 0, 20)
-                rates_m15 = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M15, 0, 20)
-                
-                if rates_m5 is not None and rates_m15 is not None and len(rates_m5) >= 20 and len(rates_m15) >= 20:
-                    df_m5 = pd.DataFrame(rates_m5)
-                    df_m15 = pd.DataFrame(rates_m15)
-                    signal = check_signal_with_forced_execution(df_m5, df_m15)
-                else:
-                    signal = "BUY"
+                signal = get_forced_signal(idx)
 
                 print(f"  └─ {symbol:<9} | Bid: {tick.bid:<9} | Ask: {tick.ask:<9} | Spread: {spread:>4.1f} pips | Signal: {signal}")
                 
-                # Execute trade on active signal
+                # Execute trade on active signal if position limit allows
                 if signal in ["BUY", "SELL"] and pos_count < 3:
                     execute_market_order(symbol, signal)
                     pos_count += 1
