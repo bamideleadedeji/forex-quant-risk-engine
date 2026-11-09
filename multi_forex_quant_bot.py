@@ -17,12 +17,21 @@ except ImportError:
 MT5_ACCOUNT = 81908061
 MT5_SERVER = "Exness-MT5Trial10"
 MT5_PASSWORD = os.getenv("MT5_PASSWORD", "").strip()
-BASE_SYMBOLS = ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "USDCHF"]
+
+# Explicitly use Exness .m suffix symbols confirmed for this demo account
+SYMBOLS = ["EURUSDm", "GBPUSDm", "USDJPYm", "AUDUSDm", "USDCADm", "USDCHFm"]
 MAGIC_NUMBER = 234000
 LOG_FILE = "trade_log.csv"
-LOT_SIZES = {"EURUSD": 0.10, "GBPUSD": 0.10, "USDJPY": 0.10, "AUDUSD": 0.10, "USDCAD": 0.10, "USDCHF": 0.10}
+LOT_SIZES = {
+    "EURUSDm": 0.10, "GBPUSDm": 0.10, "USDJPYm": 0.10, 
+    "AUDUSDm": 0.10, "USDCADm": 0.10, "USDCHFm": 0.10
+}
 
-logging.basicConfig(filename="bot_execution.log", level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+logging.basicConfig(
+    filename="bot_execution.log", 
+    level=logging.INFO, 
+    format="%(asctime)s [%(levelname)s] %(message)s"
+)
 
 def log_message(msg):
     print(f"[{datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')}] {msg}")
@@ -39,38 +48,38 @@ def initialize_mt5():
     if not authorized:
         log_message(f"MT5 login failed: {mt5.last_error()}")
         return False
+    log_message(f"Successfully connected to Exness Account #{MT5_ACCOUNT}")
     return True
 
-def resolve_exness_symbol(base):
-    info = mt5.symbol_info(base)
-    if info is not None:
-        if not info.visible:
-            mt5.symbol_select(base, True)
-        return base
-    for sfx in [".m", "pro", ".pro", ".raw", ".s"]:
-        cand = f"{base}{sfx}"
-        info = mt5.symbol_info(cand)
-        if info is not None:
-            if not info.visible:
-                mt5.symbol_select(cand, True)
-            return cand
-    return base
-
 def log_trade_to_csv(symbol, order_type, volume, price, result_status):
-    row = {"timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"), "symbol": symbol, "type": order_type, "volume": volume, "price": price, "result": result_status}
+    row = {
+        "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"), 
+        "symbol": symbol, 
+        "type": order_type, 
+        "volume": volume, 
+        "price": price, 
+        "result": result_status
+    }
     df = pd.DataFrame([row])
-    df.to_csv(LOG_FILE, mode='a', header=not os.path.exists(LOG_FILE), index=False)
+    if os.path.exists(LOG_FILE):
+        df.to_csv(LOG_FILE, mode='a', header=False, index=False)
+    else:
+        df.to_csv(LOG_FILE, mode='w', header=True, index=False)
 
 def execute_market_order(symbol, action):
+    # Ensure symbol is selected in Market Watch
+    if not mt5.symbol_select(symbol, True):
+        log_message(f"Failed to select symbol {symbol}")
+        return
+
     tick = mt5.symbol_info_tick(symbol)
     if not tick: 
         log_message(f"Failed to get tick for {symbol}")
         return
+        
     price = tick.ask if action == "BUY" else tick.bid
     order_type = mt5.ORDER_BUY if action == "BUY" else mt5.ORDER_SELL
-    
-    base_clean = symbol.replace(".m","").replace("pro","").replace(".raw","").replace(".s","")
-    lot = LOT_SIZES.get(base_clean, 0.10)
+    lot = LOT_SIZES.get(symbol, 0.10)
     
     pip = 0.01 if "JPY" in symbol else 0.0001
     sl = price - (25 * pip) if action == "BUY" else price + (25 * pip)
@@ -105,11 +114,11 @@ def main():
     if not initialize_mt5():
         return
     
-    resolved = {base: resolve_exness_symbol(base) for base in BASE_SYMBOLS}
-    log_message(f"Resolved symbols mapping: {resolved}")
+    log_message("Starting forced execution trading loop...")
 
     while True:
         if not mt5.terminal_info().connected:
+            log_message("Terminal disconnected. Reconnecting...")
             mt5.shutdown()
             time.sleep(5)
             if not initialize_mt5():
@@ -121,17 +130,17 @@ def main():
         equity = acc.equity if acc else 0.0
         balance = acc.balance if acc else 0.0
 
-        print("\n" + "="*60)
+        print("\n" + "="*66)
         print(f"[{datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}] FORCED EXECUTION ENGINE (Exness MT5)")
-        print("="*60)
+        print("="*66)
         print(f"- Equity: ${equity:,.2f} | Balance: ${balance:,.2f} | Open Positions: {pos_count} / 3")
-        print("-" * 60)
+        print("-" * 66)
         print("FX basket quotes & signals:")
 
-        for idx, (base, sym) in enumerate(resolved.items()):
+        for idx, sym in enumerate(SYMBOLS):
             tick = mt5.symbol_info_tick(sym)
             if not tick:
-                print(f"  └─ {sym:<9} | Tick unavailable")
+                print(f"  └─ {sym:<9} | Tick unavailable in Market Watch")
                 continue
             
             signal = "BUY" if idx % 2 == 0 else "SELL"
@@ -144,7 +153,7 @@ def main():
                 execute_market_order(sym, signal)
                 pos_count += 1
 
-        print("-" * 60)
+        print("-" * 66)
         print("[COMPLETE] Cycle finished.")
         time.sleep(15)
 
