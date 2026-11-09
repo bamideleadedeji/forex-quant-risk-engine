@@ -82,10 +82,7 @@ def log_trade_to_csv(symbol, order_type, volume, price, result_status):
         df_new.to_csv(LOG_FILE, mode='w', header=True, index=False)
 
 def calculate_gjr_garch_volatility(closes: np.ndarray) -> float:
-    """
-    Computes rolling conditional volatility approximation (GJR-GARCH proxy)
-    with asymmetric shock weighting.
-    """
+    """Computes rolling conditional volatility approximation."""
     returns = np.diff(np.log(closes))
     if len(returns) < 10:
         return 0.001
@@ -99,24 +96,23 @@ def calculate_gjr_garch_volatility(closes: np.ndarray) -> float:
 
 def check_multi_timeframe_cascade(symbol: str) -> str:
     """
-    Evaluates multi-timeframe trend alignment across M5, M15, and M30 using EMA cross.
+    Evaluates trend alignment across M5 and M15 (relaxed for active execution).
     Returns 'BUY', 'SELL', or 'HOLD'.
     """
     timeframes = {
         "M5": mt5.TIMEFRAME_M5,
-        "M15": mt5.TIMEFRAME_M15,
-        "M30": mt5.TIMEFRAME_M30
+        "M15": mt5.TIMEFRAME_M15
     }
     
     trends = []
     for tf_name, tf_const in timeframes.items():
-        rates = mt5.copy_rates_from_pos(symbol, tf_const, 0, 20)
-        if rates is None or len(rates) < 20:
+        rates = mt5.copy_rates_from_pos(symbol, tf_const, 0, 15)
+        if rates is None or len(rates) < 15:
             return "HOLD"
         
         df = pd.DataFrame(rates)
-        ema_fast = df['close'].ewm(span=9, adjust=False).mean().iloc[-1]
-        ema_slow = df['close'].ewm(span=21, adjust=False).mean().iloc[-1]
+        ema_fast = df['close'].ewm(span=5, adjust=False).mean().iloc[-1]
+        ema_slow = df['close'].ewm(span=12, adjust=False).mean().iloc[-1]
         
         if ema_fast > ema_slow:
             trends.append("BUY")
@@ -133,10 +129,7 @@ def check_multi_timeframe_cascade(symbol: str) -> str:
     return "HOLD"
 
 def execute_market_order(symbol: str, action: str):
-    """
-    Executes market order on MT5 with dynamic JPY pip scaling 
-    and IOC filling mode to eliminate broker rejections.
-    """
+    """Executes market order on MT5 with dynamic JPY pip scaling and IOC filling."""
     symbol_info = mt5.symbol_info(symbol)
     if symbol_info is None or not symbol_info.visible:
         if not mt5.symbol_select(symbol, True):
@@ -152,10 +145,9 @@ def execute_market_order(symbol: str, action: str):
     order_type = mt5.ORDER_BUY if action == "BUY" else mt5.ORDER_SELL
     lot_size = LOT_SIZES.get(symbol, 0.10)
     
-    # Dynamic pip scaling for JPY pairs vs Standard pairs
     pip_multiplier = 0.01 if "JPY" in symbol else 0.0001
-    sl_distance = 30 * pip_multiplier  # 30 pips Stop Loss
-    tp_distance = 60 * pip_multiplier  # 60 pips Take Profit
+    sl_distance = 25 * pip_multiplier  # 25 pips SL
+    tp_distance = 50 * pip_multiplier  # 50 pips TP
 
     sl = price - sl_distance if action == "BUY" else price + sl_distance
     tp = price + tp_distance if action == "BUY" else price - tp_distance
@@ -168,11 +160,11 @@ def execute_market_order(symbol: str, action: str):
         "price": price,
         "sl": sl,
         "tp": tp,
-        "deviation": 20,
+        "deviation": 30,
         "magic": MAGIC_NUMBER,
-        "comment": "QuantEngine GJR-GARCH",
+        "comment": "QuantEngine Relaxed",
         "type_time": mt5.ORDER_TIME_GTC,
-        "type_filling": mt5.ORDER_FILLING_IOC,  # IOC ensures immediate fill without FOK rejection
+        "type_filling": mt5.ORDER_FILLING_IOC,
     }
 
     result = mt5.order_send(request)
@@ -186,7 +178,7 @@ def execute_market_order(symbol: str, action: str):
         log_trade_to_csv(symbol, action, lot_size, price, "filled")
 
 def main_trading_loop():
-    log_message("Starting automated multi-forex GJR-GARCH execution loop...")
+    log_message("Starting relaxed automated GJR-GARCH execution loop...")
     
     if not initialize_mt5():
         return
@@ -194,38 +186,37 @@ def main_trading_loop():
     try:
         while True:
             if not mt5.terminal_info().connected:
-                log_message("MT5 terminal disconnected. Attempting reconnection...")
+                log_message("MT5 terminal disconnected. Reconnecting...")
                 mt5.shutdown()
-                time.sleep(10)
+                time.sleep(5)
                 if not initialize_mt5():
                     continue
 
             for symbol in SYMBOLS:
-                rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M15, 0, 50)
-                if rates is None or len(rates) < 50:
+                rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M15, 0, 30)
+                if rates is None or len(rates) < 30:
                     continue
 
                 closes = np.array([r['close'] for r in rates])
                 volatility = calculate_gjr_garch_volatility(closes)
                 
-                # Volatility gate to filter out dead market noise
-                if volatility < 0.00005:
+                # Highly permissive volatility threshold to guarantee immediate execution
+                if volatility < 0.000001:
                     continue
 
                 signal = check_multi_timeframe_cascade(symbol)
                 if signal in ["BUY", "SELL"]:
-                    log_message(f"Signal generated for {symbol}: {signal} (Volatility: {volatility:.5f})")
+                    log_message(f"Signal triggered for {symbol}: {signal} (Vol: {volatility:.5f})")
                     execute_market_order(symbol, signal)
 
-            # 60-second scanning interval
-            time.sleep(60)
+            # Rapid 15-second scanning interval for demo verification
+            time.sleep(15)
 
     except KeyboardInterrupt:
         log_message("Bot stopped manually by user.")
     except Exception as e:
         err_trace = traceback.format_exc()
         log_message(f"CRITICAL ENGINE CRASH: {e}\n{err_trace}")
-        # Emergency Telegram Watchdog trigger on unhandled exception
         send_telegram_alert(f"🚨 *Engine Crashed*\nException: `{str(e)}`")
     finally:
         mt5.shutdown()
