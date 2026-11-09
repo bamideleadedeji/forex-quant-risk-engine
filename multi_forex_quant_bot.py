@@ -8,7 +8,10 @@ import numpy as np
 import MetaTrader5 as mt5
 from dotenv import load_dotenv
 
+# Load local environment variables (.env)
 load_dotenv()
+
+# Import emergency Telegram watchdog
 from telegram_alert import send_telegram_alert
 
 # --- CONFIGURATION & ACCOUNT PARAMETERS ---
@@ -16,7 +19,7 @@ MT5_ACCOUNT = 81908061
 MT5_SERVER = "Exness-MT5Trial10"
 MT5_PASSWORD = os.getenv("MT5_PASSWORD", "").strip()
 
-BASE_SYMBOLS = ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD"]
+BASE_SYMBOLS = ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "USDCHF"]
 MAGIC_NUMBER = 234000
 LOG_FILE = "trade_log.csv"
 
@@ -24,9 +27,12 @@ LOT_SIZES = {
     "EURUSD": 0.10,
     "GBPUSD": 0.10,
     "USDJPY": 0.10,
-    "AUDUSD": 0.10
+    "AUDUSD": 0.10,
+    "USDCAD": 0.10,
+    "USDCHF": 0.10
 }
 
+# Configure local logging
 logging.basicConfig(
     filename="bot_execution.log",
     level=logging.INFO,
@@ -65,14 +71,12 @@ def resolve_exness_symbol(base_symbol: str) -> str:
     Auto-detects the exact broker symbol name on Exness 
     (handling suffixes like .m, .pro, .raw or no suffix).
     """
-    # Test exact match first
     info = mt5.symbol_info(base_symbol)
     if info is not None:
         if not info.visible:
             mt5.symbol_select(base_symbol, True)
         return base_symbol
 
-    # Test common Exness suffixes
     suffixes = [".m", "pro", ".pro", ".raw", ".s"]
     for sfx in suffixes:
         candidate = f"{base_symbol}{sfx}"
@@ -82,7 +86,6 @@ def resolve_exness_symbol(base_symbol: str) -> str:
                 mt5.symbol_select(candidate, True)
             return candidate
 
-    # Search all available terminal symbols as fallback
     all_symbols = mt5.symbols_get()
     if all_symbols:
         for sym in all_symbols:
@@ -94,6 +97,7 @@ def resolve_exness_symbol(base_symbol: str) -> str:
     return base_symbol
 
 def log_trade_to_csv(symbol, order_type, volume, price, result_status):
+    """Appends trade execution telemetry to trade_log.csv for audit tracking."""
     row = {
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "symbol": symbol,
@@ -109,22 +113,17 @@ def log_trade_to_csv(symbol, order_type, volume, price, result_status):
         df_new.to_csv(LOG_FILE, mode='w', header=True, index=False)
 
 def calculate_volatility(closes: np.ndarray) -> float:
+    """Computes rolling volatility approximation."""
     returns = np.diff(np.log(closes))
     if len(returns) < 5:
         return 0.001
     return float(np.std(returns))
 
-def check_signal(symbol: str) -> str:
-    """Evaluates M5 and M15 trend alignment with verbose logging."""
-    rates_m5 = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M5, 0, 15)
-    rates_m15 = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M15, 0, 15)
-    
-    if rates_m5 is None or rates_m15 is None or len(rates_m5) < 15 or len(rates_m15) < 15:
-        return "HOLD"
-    
-    df_m5 = pd.DataFrame(rates_m5)
-    df_m15 = pd.DataFrame(rates_m15)
-    
+def check_signal_with_momentum(df_m5, df_m15) -> str:
+    """
+    Evaluates trend alignment across M5 and M15 with momentum fallback 
+    to guarantee active execution during demo testing.
+    """
     ema_fast_5 = df_m5['close'].ewm(span=5, adjust=False).mean().iloc[-1]
     ema_slow_5 = df_m5['close'].ewm(span=12, adjust=False).mean().iloc[-1]
     
@@ -135,22 +134,45 @@ def check_signal(symbol: str) -> str:
         return "BUY"
     elif ema_fast_5 < ema_slow_5 and ema_fast_15 < ema_slow_15:
         return "SELL"
+    
+    # Active momentum fallback to prevent indefinite NEUTRAL stagnation
+    price_change = df_m5['close'].iloc[-1] - df_m5['close'].iloc[-3]
+    if price_change > 0.00008:
+        return "BUY"
+    elif price_change < -0.00008:
+        return "SELL"
         
-    return "HOLD"
+    return "NEUTRAL"
 
 def execute_market_order(symbol: str, action: str):
+    """
+    Executes market order on MT5 with dynamic JPY pip scaling 
+    and IOC filling mode to eliminate broker rejections.
+    """
+    symbol_info = mt5.symbol_info(symbol)
+    if symbol_info is None or not symbol_info.visible:
+        if not mt5.symbol_select(symbol, True):
+            log_message(f"Failed to select symbol {symbol}")
+            return
+
     tick = mt5.symbol_info_tick(symbol)
     if tick is None:
-        log_message(f"Failed to get tick for resolved symbol {symbol}")
+        log_message(f"Failed to get tick for {symbol}")
         return
 
     price = tick.ask if action == "BUY" else tick.bid
     order_type = mt5.ORDER_BUY if action == "BUY" else mt5.ORDER_SELL
-    lot_size = LOT_SIZES.get(symbol.replace(".m","").replace("pro",""), 0.10)
     
+    base_clean = symbol.replace(".m", "").replace("pro", "").replace(".raw", "").replace(".s", "")
+    lot_size = LOT_SIZES.get(base_clean, 0.10)
+    
+    # Dynamic pip scaling for JPY pairs vs Standard pairs
     pip_multiplier = 0.01 if "JPY" in symbol else 0.0001
-    sl = price - (25 * pip_multiplier) if action == "BUY" else price + (25 * pip_multiplier)
-    tp = price + (50 * pip_multiplier) if action == "BUY" else price - (50 * pip_multiplier)
+    sl_distance = 25 * pip_multiplier  # 25 pips Stop Loss
+    tp_distance = 50 * pip_multiplier  # 50 pips Take Profit
+
+    sl = price - sl_distance if action == "BUY" else price + sl_distance
+    tp = price + tp_distance if action == "BUY" else price - tp_distance
 
     request = {
         "action": mt5.TRADE_ACTION_DEAL,
@@ -162,14 +184,14 @@ def execute_market_order(symbol: str, action: str):
         "tp": tp,
         "deviation": 30,
         "magic": MAGIC_NUMBER,
-        "comment": "QuantEngine Live",
+        "comment": "QuantEngine Pro",
         "type_time": mt5.ORDER_TIME_GTC,
         "type_filling": mt5.ORDER_FILLING_IOC,
     }
 
     result = mt5.order_send(request)
     if result.retcode != mt5.TRADE_RETCODE_DONE:
-        err_msg = f"Order failed for {symbol} ({action}), retcode={result.retcode}"
+        err_msg = f"Order execution failed for {symbol} ({action}), retcode={result.retcode}"
         log_message(err_msg)
         log_trade_to_csv(symbol, action, lot_size, price, f"rejected_{result.retcode}")
     else:
@@ -178,12 +200,12 @@ def execute_market_order(symbol: str, action: str):
         log_trade_to_csv(symbol, action, lot_size, price, "filled")
         send_telegram_alert(success_msg)
 
-def main_loop():
-    log_message("Starting self-healing automated execution engine...")
+def main_trading_loop():
+    log_message("Starting professional automated execution engine...")
+    
     if not initialize_mt5():
         return
 
-    # Resolve exact broker symbol names on startup
     resolved_symbols = {}
     for base in BASE_SYMBOLS:
         actual = resolve_exness_symbol(base)
@@ -193,38 +215,43 @@ def main_loop():
     try:
         while True:
             if not mt5.terminal_info().connected:
-                log_message("MT5 disconnected. Reconnecting...")
+                log_message("MT5 terminal disconnected. Reconnecting...")
                 mt5.shutdown()
                 time.sleep(5)
                 if not initialize_mt5():
                     continue
 
             for base, symbol in resolved_symbols.items():
-                rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M15, 0, 30)
-                if rates is None or len(rates) < 30:
-                    log_message(f"Warning: Could not fetch rates for {symbol}")
+                rates_m5 = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M5, 0, 20)
+                rates_m15 = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M15, 0, 20)
+                
+                if rates_m5 is None or rates_m15 is None or len(rates_m5) < 20 or len(rates_m15) < 20:
                     continue
 
-                closes = np.array([r['close'] for r in rates])
-                vol = calculate_volatility(closes)
+                df_m5 = pd.DataFrame(rates_m5)
+                df_m15 = pd.DataFrame(rates_m15)
                 
-                signal = check_signal(symbol)
-                log_message(f"Scanned {symbol} | Vol: {vol:.5f} | Signal: {signal}")
+                closes = df_m15['close'].values
+                volatility = calculate_volatility(closes)
+                
+                signal = check_signal_with_momentum(df_m5, df_m15)
+                log_message(f"Scanned {symbol} | Vol: {volatility:.5f} | Signal: {signal}")
 
                 if signal in ["BUY", "SELL"]:
                     execute_market_order(symbol, signal)
 
+            # 15-second scanning interval for active demo verification
             time.sleep(15)
 
     except KeyboardInterrupt:
-        log_message("Bot stopped by user.")
+        log_message("Bot stopped manually by user.")
     except Exception as e:
         err_trace = traceback.format_exc()
-        log_message(f"CRITICAL CRASH: {e}\n{err_trace}")
-        send_telegram_alert(f"🚨 *Engine Crashed*\n`{str(e)}`")
+        log_message(f"CRITICAL ENGINE CRASH: {e}\n{err_trace}")
+        send_telegram_alert(f"🚨 *Engine Crashed*\nException: `{str(e)}`")
     finally:
         mt5.shutdown()
-        log_message("MT5 closed cleanly.")
+        log_message("MT5 connection closed cleanly.")
 
 if __name__ == "__main__":
-    main_loop()
+    main_trading_loop()
