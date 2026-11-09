@@ -29,16 +29,16 @@ MAGIC_NUMBER = 1008061
 
 NEWS_API_KEY = os.environ.get("FINNHUB_API_KEY", "dbjlpihr01qonjmerf9gdbjlpihr01qonjmerfa0").strip()
 
-# Basket includes major forex pairs + Gold (XAUUSDm) for fast scalping
+# Basket includes major forex pairs + Gold (XAUUSDm) for dynamic scalping & swing trading
 BASKET_PAIRS = ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "USDCHF", "XAUUSDm"]
 
-BASE_LOT_PER_1000_EQUITY = 0.01   # 0.01 lots per $1,000 equity
-MAX_CONCURRENT_OPEN_TRADES = 5    # Optimized concurrency
-NEWS_BLACKOUT_MINUTES = 30        # Strict 30m news guard
-MAX_SPREAD_PIPS = float(os.environ.get("MAX_SPREAD_PIPS", "3.0"))
+BASE_LOT_PER_1000_EQUITY = 0.01    # 0.01 lots per $1,000 equity
+MAX_CONCURRENT_OPEN_TRADES = 6     # Optimized concurrency for multi-timeframe scaling
+NEWS_BLACKOUT_MINUTES = 30         # Strict 30m news guard
+MAX_SPREAD_PIPS = float(os.environ.get("MAX_SPREAD_PIPS", "3.5"))
 
-# Calibrated GJR-GARCH Volatility Ceiling (3.5% daily conditional volatility)
-MAX_ALLOWED_GJR_GARCH_VOL = 0.035
+# Calibrated GJR-GARCH Volatility Ceiling (4.0% daily conditional volatility threshold)
+MAX_ALLOWED_GJR_GARCH_VOL = 0.040
 
 LOG_FILE = os.environ.get("LOG_FILE", "trade_log.csv")
 LOOP_MINUTES = int(os.environ.get("LOOP_MINUTES", "0") or 0)
@@ -220,7 +220,7 @@ def calculate_proportional_lots(equity: float) -> float:
 
 
 # ----------------------------------------------------------------------
-# 7. Asset-Optimized Signal Cascade Engine
+# 7. Multi-Timeframe Precision Signal Cascade Engine
 # ----------------------------------------------------------------------
 def compute_signal_on_timeframe(symbol: str, timeframe):
     rates = mt5.copy_rates_from_pos(symbol, timeframe, 0, 100)
@@ -231,7 +231,7 @@ def compute_signal_on_timeframe(symbol: str, timeframe):
     df["ema_fast"] = df["close"].ewm(span=9, adjust=False).mean()
     df["ema_slow"] = df["close"].ewm(span=21, adjust=False).mean()
     
-    # RSI calculation (14 periods)
+    # RSI calculation (14 periods) with optimized threshold buffers for higher frequency
     delta = df["close"].diff()
     gain = delta.where(delta > 0, 0.0)
     loss = -delta.where(delta < 0, 0.0)
@@ -246,9 +246,10 @@ def compute_signal_on_timeframe(symbol: str, timeframe):
     curr_rsi = df["rsi"].iloc[-1]
     bar_time = int(df["time"].iloc[-1])
 
-    if curr_fast > curr_slow and curr_rsi > 42.0:
+    # Balanced RSI filters (40.0 / 60.0) to prevent trade starvation while retaining momentum filter
+    if curr_fast > curr_slow and curr_rsi > 40.0:
         return "BUY", bar_time, curr_close
-    elif curr_fast < curr_slow and curr_rsi < 58.0:
+    elif curr_fast < curr_slow and curr_rsi < 60.0:
         return "SELL", bar_time, curr_close
 
     return "NEUTRAL", bar_time, curr_close
@@ -256,9 +257,9 @@ def compute_signal_on_timeframe(symbol: str, timeframe):
 
 def evaluate_market_signal(symbol: str):
     """
-    Asset-Optimized Routing:
+    Asset-Optimized Multi-Timeframe Routing:
     - Gold (XAUUSDm): Fast M1 -> M5 cascade for instant scalping.
-    - Forex Pairs: Reliable M15 -> M30 cascade for stable trend execution.
+    - Forex Pairs: Multi-timeframe cascade checking M5 -> M15 -> M30 for robust frequency & trend execution.
     """
     if "XAU" in symbol.upper():
         for tf_name, tf in [("M1", mt5.TIMEFRAME_M1), ("M5", mt5.TIMEFRAME_M5)]:
@@ -267,7 +268,8 @@ def evaluate_market_signal(symbol: str):
                 return f"{sig} ({tf_name})", b_time, c_close
         return "NEUTRAL", None, 0.0
     else:
-        for tf_name, tf in [("M15", mt5.TIMEFRAME_M15), ("M30", mt5.TIMEFRAME_M30)]:
+        # Added M30 timeframe explicitly alongside M5 and M15 to maximize precision & trading frequency
+        for tf_name, tf in [("M5", mt5.TIMEFRAME_M5), ("M15", mt5.TIMEFRAME_M15), ("M30", mt5.TIMEFRAME_M30)]:
             sig, b_time, c_close = compute_signal_on_timeframe(symbol, tf)
             if sig in ("BUY", "SELL"):
                 return f"{sig} ({tf_name})", b_time, c_close
