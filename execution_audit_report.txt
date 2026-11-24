@@ -1,0 +1,30 @@
+=====================================================================
+EXECUTIVE QUANTITATIVE PERFORMANCE AUDIT REPORT
+Generated (UTC): 2026-11-24 12:24:01
+=====================================================================
+1. PORTFOLIO SUMMARY
+   - Total Logged Events      : 29
+   - Active Symbols Tracked   : SYSTEM, USDCADm, AUDUSDm, USDJPYm, USDCHFm, GBPUSDm, EURUSDm
+   - Successful Order Fills   : 12
+   - News Blackout Protections: 7
+
+2. EXECUTION RESULT BREAKDOWN
+   - filled                  : 12
+   - news_blackout_active    : 7
+   - REJECTED_10031          : 5
+   - FILLED                  : 4
+   - REJECTED_10018          : 1
+
+3. RECENT EXECUTION TELEMETRY
+           utc_time  symbol signal     price  lots        sl        tp         result      ticket
+2026-11-22 16:29:45 AUDUSDm   SELL   0.66189  0.15   0.66398   0.65771 REJECTED_10018         NaN
+2026-11-23 09:05:40 GBPUSDm   SELL   1.31284  0.10   1.31612   1.30628 REJECTED_10031         NaN
+2026-11-23 09:05:40 USDJPYm   SELL 159.17000  0.14 159.56800 158.37400 REJECTED_10031         NaN
+2026-11-23 09:05:40 USDCHFm   SELL   0.83891  0.12   0.84126   0.83420 REJECTED_10031         NaN
+2026-11-23 09:36:06 GBPUSDm   SELL   1.31177  0.10   1.31505   1.30521         FILLED 594965478.0
+2026-11-23 09:36:07 USDJPYm   SELL 159.15500  0.14 159.55300 158.35900         FILLED 594965487.0
+2026-11-24 09:09:36 GBPUSDm   SELL   1.30525  0.10   1.30851   1.29872 REJECTED_10031         NaN
+2026-11-24 09:09:36 USDCHFm   SELL   0.84139  0.13   0.84353   0.83711 REJECTED_10031         NaN
+2026-11-24 12:23:56 GBPUSDm   SELL   1.30871  0.10   1.31198   1.30217         FILLED 599515581.0
+2026-11-24 12:23:56 USDCHFm   SELL   0.83799  0.13   0.84013   0.83371         FILLED 599515594.0
+=====================================================================

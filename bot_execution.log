@@ -1,0 +1,315 @@
+2026-11-09 18:39:24,861 [INFO] Successfully connected to Exness Account #81908061
+2026-11-09 18:39:24,864 [INFO] Resolved Symbols: {'EURUSD': 'EURUSD', 'GBPUSD': 'GBPUSD', 'USDJPY': 'USDJPY', 'AUDUSD': 'AUDUSD', 'USDCAD': 'USDCAD', 'USDCHF': 'USDCHF'}
+2026-11-17 09:40:57,743 [WARNING] Finnhub calendar check error: Failed to parse: 'finnhub.io2026-11-16&to=2026-11-18&token=dbcbqbhr01qioil6nl50dbcbqbhr01qioil6nl5g', label empty or too long
+2026-11-17 09:40:57,754 [INFO] Connected to Exness Account #81908061 | Equity: $10,083.88 | Balance: $9,989.48 | Open: 3/3
+2026-11-17 09:40:58,010 [INFO] EURUSDm   | Bid: 1.10023   | Ask: 1.10031   | Spread:  0.8p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=53.4)
+2026-11-17 09:40:58,012 [INFO]   -> Skipped EURUSDm: Active position already open on EURUSDm.
+2026-11-17 09:40:58,151 [INFO] GBPUSDm   | Bid: 1.31932   | Ask: 1.31942   | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.31912, EMA50=1.32037, RSI=57.1))
+2026-11-17 09:40:58,288 [INFO] USDJPYm   | Bid: 159.142   | Ask: 159.152   | Spread:  1.0p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=35.4)
+2026-11-17 09:40:58,290 [INFO]   -> Skipped USDJPYm: Active position already open on USDJPYm.
+2026-11-17 09:40:58,509 [INFO] AUDUSDm   | Bid: 0.67372   | Ask: 0.67381   | Spread:  0.9p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.68021, EMA50=0.68565, RSI=13.1))
+2026-11-17 09:40:58,695 [INFO] USDCADm   | Bid: 1.42923   | Ask: 1.42939   | Spread:  1.6p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.42218, EMA50=1.41451, RSI=87.5))
+2026-11-17 09:40:58,834 [INFO] USDCHFm   | Bid: 0.83939   | Ask: 0.83952   | Spread:  1.3p | Lots: 0.10 | BUY (Bullish EMA20>EMA50 & RSI=51.8)
+2026-11-17 09:40:58,834 [INFO]   -> Skipped USDCHFm: Max open positions (3) reached.
+2026-11-17 09:40:58,835 [INFO] [COMPLETE] Institutional FX risk execution cycle finished cleanly.
+2026-11-17 09:44:02,808 [WARNING] Finnhub calendar check error: Failed to parse: 'finnhub.io2026-11-16&to=2026-11-18&token=dbcbqbhr01qioil6nl50dbcbqbhr01qioil6nl5g', label empty or too long
+2026-11-17 09:44:02,818 [INFO] Connected to Exness Account #81908061 | Equity: $10,080.79 | Balance: $9,989.48 | Open: 3/3
+2026-11-17 09:44:02,851 [INFO] EURUSDm   | Bid: 1.10047   | Ask: 1.10055   | Spread:  0.8p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.10043, EMA50=1.10187, RSI=54.9))
+2026-11-17 09:44:02,863 [INFO] GBPUSDm   | Bid: 1.31955   | Ask: 1.31965   | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.31914, EMA50=1.32038, RSI=58.5))
+2026-11-17 09:44:02,875 [INFO] USDJPYm   | Bid: 159.092   | Ask: 159.102   | Spread:  1.0p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=33.9)
+2026-11-17 09:44:02,876 [INFO]   -> Skipped USDJPYm: Active position already open on USDJPYm.
+2026-11-17 09:44:02,985 [INFO] AUDUSDm   | Bid: 0.67389   | Ask: 0.67398   | Spread:  0.9p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=48.7)
+2026-11-17 09:44:02,985 [INFO]   -> Skipped AUDUSDm: Max open positions (3) reached.
+2026-11-17 09:44:03,095 [INFO] USDCADm   | Bid: 1.4289399999999999 | Ask: 1.4291    | Spread:  1.6p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.42966, EMA50=1.42848, RSI=44.5))
+2026-11-17 09:44:03,205 [INFO] USDCHFm   | Bid: 0.83914   | Ask: 0.83927   | Spread:  1.3p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.83950, EMA50=0.83861, RSI=45.6))
+2026-11-17 09:44:03,206 [INFO] [COMPLETE] Institutional FX risk execution cycle finished cleanly.
+2026-11-17 09:46:15,300 [WARNING] Finnhub calendar check error: Expecting value: line 1 column 1 (char 0)
+2026-11-17 09:46:15,327 [INFO] Connected to Exness Account #81908061 | Equity: $10,079.42 | Balance: $9,989.48 | Open: 3/3
+2026-11-17 09:46:15,379 [INFO] EURUSDm   | Bid: 1.10064   | Ask: 1.10072   | Spread:  0.8p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.10045, EMA50=1.10188, RSI=55.9))
+2026-11-17 09:46:15,401 [INFO] GBPUSDm   | Bid: 1.31992   | Ask: 1.32002   | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.31917, EMA50=1.32040, RSI=60.6))
+2026-11-17 09:46:15,419 [INFO] USDJPYm   | Bid: 159.1     | Ask: 159.11    | Spread:  1.0p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=34.1)
+2026-11-17 09:46:15,421 [INFO]   -> Skipped USDJPYm: Active position already open on USDJPYm.
+2026-11-17 09:46:15,440 [INFO] AUDUSDm   | Bid: 0.67408   | Ask: 0.67417   | Spread:  0.9p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=50.9)
+2026-11-17 09:46:15,441 [INFO]   -> Skipped AUDUSDm: Max open positions (3) reached.
+2026-11-17 09:46:15,462 [INFO] USDCADm   | Bid: 1.42904   | Ask: 1.4292    | Spread:  1.6p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.42967, EMA50=1.42848, RSI=45.1))
+2026-11-17 09:46:15,480 [INFO] USDCHFm   | Bid: 0.839     | Ask: 0.83913   | Spread:  1.3p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.83949, EMA50=0.83860, RSI=44.7))
+2026-11-17 09:46:15,481 [INFO] [COMPLETE] Institutional FX risk execution cycle finished cleanly.
+2026-11-17 09:50:00,274 [INFO] Connected to Exness Account #81908061 | Equity: $10,083.45 | Balance: $9,989.48 | Open: 3/3
+2026-11-17 09:50:00,311 [INFO] EURUSDm   | Bid: 1.10042   | Ask: 1.1005    | Spread:  0.8p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=54.6)
+2026-11-17 09:50:00,312 [INFO]   -> Skipped EURUSDm: Active position already open on EURUSDm.
+2026-11-17 09:50:00,333 [INFO] GBPUSDm   | Bid: 1.31939   | Ask: 1.31949   | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.31912, EMA50=1.32038, RSI=57.5))
+2026-11-17 09:50:00,349 [INFO] USDJPYm   | Bid: 159.117   | Ask: 159.127   | Spread:  1.0p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=34.6)
+2026-11-17 09:50:00,353 [INFO]   -> Skipped USDJPYm: Active position already open on USDJPYm.
+2026-11-17 09:50:00,385 [INFO] AUDUSDm   | Bid: 0.6738    | Ask: 0.67389   | Spread:  0.9p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=47.6)
+2026-11-17 09:50:00,388 [INFO]   -> Skipped AUDUSDm: Max open positions (3) reached.
+2026-11-17 09:50:00,426 [INFO] USDCADm   | Bid: 1.42922   | Ask: 1.42938   | Spread:  1.6p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.42969, EMA50=1.42849, RSI=46.2))
+2026-11-17 09:50:00,459 [INFO] USDCHFm   | Bid: 0.83914   | Ask: 0.83927   | Spread:  1.3p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.83950, EMA50=0.83861, RSI=45.6))
+2026-11-17 09:50:00,463 [INFO] [COMPLETE] Institutional FX risk execution cycle finished cleanly.
+2026-11-17 10:11:01,036 [INFO] Connected to Exness Account #81908061 | Equity: $10,073.70 | Balance: $9,989.48 | Open: 3/3
+2026-11-17 10:11:01,071 [INFO] EURUSDm   | Bid: 1.09999   | Ask: 1.10007   | Spread:  0.8p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=48.2)
+2026-11-17 10:11:01,072 [INFO]   -> Skipped EURUSDm: Active position already open on EURUSDm.
+2026-11-17 10:11:01,085 [INFO] GBPUSDm   | Bid: 1.31908   | Ask: 1.31918   | Spread:  1.0p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=54.3)
+2026-11-17 10:11:01,086 [INFO]   -> Skipped GBPUSDm: Active position already open on GBPUSDm.
+2026-11-17 10:11:01,099 [INFO] USDJPYm   | Bid: 158.98    | Ask: 158.99    | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=159.34431, EMA50=159.51534, RSI=30.3))
+2026-11-17 10:11:01,112 [INFO] AUDUSDm   | Bid: 0.67336   | Ask: 0.67345   | Spread:  0.9p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=42.1)
+2026-11-17 10:11:01,113 [INFO]   -> Skipped AUDUSDm: Max open positions (3) reached.
+2026-11-17 10:11:01,126 [INFO] USDCADm   | Bid: 1.42931   | Ask: 1.42947   | Spread:  1.6p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.42967, EMA50=1.42857, RSI=50.4))
+2026-11-17 10:11:01,139 [INFO] USDCHFm   | Bid: 0.83886   | Ask: 0.83899   | Spread:  1.3p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.83945, EMA50=0.83866, RSI=43.1))
+2026-11-17 10:11:01,139 [INFO] [COMPLETE] Institutional FX risk execution cycle finished cleanly.
+2026-11-17 10:26:14,294 [INFO] Connected to Exness Account #81908061 | Equity: $10,068.18 | Balance: $10,068.18 | Open: 0/3
+2026-11-17 10:26:14,327 [INFO] EURUSDm   | Bid: 1.10012   | Ask: 1.1002    | Spread:  0.8p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=49.2)
+2026-11-17 10:26:14,432 [INFO]   -> [SUCCESS] FILLED SELL 0.1 EURUSDm @ 1.10012 | SL: 1.10232 | TP: 1.09572 | Ticket: 575157321
+2026-11-17 10:26:14,467 [INFO] GBPUSDm   | Bid: 1.31912   | Ask: 1.31922   | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.31909, EMA50=1.32022, RSI=54.6))
+2026-11-17 10:26:14,478 [INFO] USDJPYm   | Bid: 158.936   | Ask: 158.946   | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=159.34012, EMA50=159.51362, RSI=29.3))
+2026-11-17 10:26:14,490 [INFO] AUDUSDm   | Bid: 0.67289   | Ask: 0.67298   | Spread:  0.9p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=37.6)
+2026-11-17 10:26:14,596 [INFO]   -> [SUCCESS] FILLED SELL 0.1 AUDUSDm @ 0.67289 | SL: 0.67424 | TP: 0.6702 | Ticket: 575157324
+2026-11-17 10:26:14,619 [INFO] USDCADm   | Bid: 1.42963   | Ask: 1.4297900000000001 | Spread:  1.6p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.42970, EMA50=1.42859, RSI=52.8))
+2026-11-17 10:26:14,630 [INFO] USDCHFm   | Bid: 0.8385    | Ask: 0.83863   | Spread:  1.3p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.83941, EMA50=0.83865, RSI=41.2))
+2026-11-17 10:26:14,631 [INFO] [COMPLETE] Institutional FX risk execution cycle finished cleanly.
+2026-11-17 16:50:04,043 [INFO] Connected to Exness Account #81908061 | Equity: $10,049.58 | Balance: $10,054.68 | Open: 1/3
+2026-11-17 16:50:04,253 [INFO] EURUSDm   | Bid: 1.10057   | Ask: 1.10065   | Spread:  0.8p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=47.2)
+2026-11-17 16:50:04,254 [INFO]   -> Skipped EURUSDm: Active position already open on EURUSDm.
+2026-11-17 16:50:04,387 [INFO] GBPUSDm   | Bid: 1.32025   | Ask: 1.32035   | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.31912, EMA50=1.32037, RSI=57.1))
+2026-11-17 16:50:04,568 [INFO] USDJPYm   | Bid: 159.276   | Ask: 159.286   | Spread:  1.0p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=35.9)
+2026-11-17 16:50:04,783 [INFO]   -> [SUCCESS] FILLED SELL 0.1 USDJPYm @ 159.276 | SL: 159.595 | TP: 158.639 | Ticket: 576717512
+2026-11-17 16:50:05,114 [INFO] AUDUSDm   | Bid: 0.67316   | Ask: 0.67325   | Spread:  0.9p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=45.9)
+2026-11-17 16:50:05,121 [INFO]   -> [CORRELATION GUARD] Skipped AUDUSDm: Max USD exposure (2) reached.
+2026-11-17 16:50:05,338 [INFO] USDCADm   | Bid: 1.42911   | Ask: 1.42927   | Spread:  1.6p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.42956, EMA50=1.42873, RSI=35.9))
+2026-11-17 16:50:05,516 [INFO] USDCHFm   | Bid: 0.83885   | Ask: 0.83898   | Spread:  1.3p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.83964, EMA50=0.83887, RSI=43.6))
+2026-11-17 16:50:05,517 [INFO] [COMPLETE] Institutional FX risk execution cycle finished cleanly.
+2026-11-17 17:05:25,837 [INFO] Connected to Exness Account #81908061 | Equity: $10,047.28 | Balance: $10,054.68 | Open: 2/3
+2026-11-17 17:05:25,878 [INFO] EURUSDm   | Bid: 1.10048   | Ask: 1.10056   | Spread:  0.8p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.09988, EMA50=1.10119, RSI=51.3))
+2026-11-17 17:05:25,899 [INFO] GBPUSDm   | Bid: 1.32053   | Ask: 1.32063   | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.31936, EMA50=1.32013, RSI=60.4))
+2026-11-17 17:05:25,917 [INFO] USDJPYm   | Bid: 159.317   | Ask: 159.327   | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=159.31597, EMA50=159.45477, RSI=47.3))
+2026-11-17 17:05:25,929 [INFO] AUDUSDm   | Bid: 0.67379   | Ask: 0.67388   | Spread:  0.9p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=47.2)
+2026-11-17 17:05:25,930 [INFO]   -> [CORRELATION GUARD] Skipped AUDUSDm: Max USD exposure (2) reached.
+2026-11-17 17:05:25,942 [INFO] USDCADm   | Bid: 1.42848   | Ask: 1.4286400000000001 | Spread:  1.6p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.42942, EMA50=1.42870, RSI=35.1))
+2026-11-17 17:05:25,954 [INFO] USDCHFm   | Bid: 0.83928   | Ask: 0.83941   | Spread:  1.3p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.83961, EMA50=0.83888, RSI=48.1))
+2026-11-17 17:05:25,955 [INFO] [COMPLETE] Institutional FX risk execution cycle finished cleanly.
+2026-11-17 17:20:56,335 [WARNING] Macro calendar fallback warning: HTTPSConnectionPool(host='www.forexfactory.com', port=443): Max retries exceeded with url: / (Caused by SSLError(SSLError(1, '[SSL: SSLV3_ALERT_BAD_RECORD_MAC] sslv3 alert bad record mac (_ssl.c:2660)')))
+2026-11-17 17:20:56,354 [INFO] Connected to Exness Account #81908061 | Equity: $10,045.21 | Balance: $10,054.68 | Open: 2/3
+2026-11-17 17:20:56,389 [INFO] EURUSDm   | Bid: 1.1008499999999999 | Ask: 1.10093   | Spread:  0.8p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.09991, EMA50=1.10121, RSI=53.2))
+2026-11-17 17:20:56,403 [INFO] GBPUSDm   | Bid: 1.32123   | Ask: 1.3213300000000001 | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.31943, EMA50=1.32015, RSI=63.4))
+2026-11-17 17:20:56,417 [INFO] USDJPYm   | Bid: 159.291   | Ask: 159.301   | Spread:  1.0p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=46.4)
+2026-11-17 17:20:56,418 [INFO]   -> Skipped USDJPYm: Active position already open on USDJPYm.
+2026-11-17 17:20:56,430 [INFO] AUDUSDm   | Bid: 0.67404   | Ask: 0.67413   | Spread:  0.9p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.67390, EMA50=0.67526, RSI=49.6))
+2026-11-17 17:20:56,442 [INFO] USDCADm   | Bid: 1.42807   | Ask: 1.42823   | Spread:  1.6p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.42938, EMA50=1.42869, RSI=33.1))
+2026-11-17 17:20:56,458 [INFO] USDCHFm   | Bid: 0.83877   | Ask: 0.8389    | Spread:  1.3p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.83957, EMA50=0.83886, RSI=45.9))
+2026-11-17 17:20:56,459 [INFO] [COMPLETE] Institutional FX risk execution cycle finished cleanly.
+2026-11-17 17:36:21,129 [INFO] Connected to Exness Account #81908061 | Equity: $10,041.89 | Balance: $10,054.68 | Open: 2/3
+2026-11-17 17:36:21,217 [INFO] EURUSDm   | Bid: 1.10149   | Ask: 1.10157   | Spread:  0.8p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.09997, EMA50=1.10123, RSI=56.2))
+2026-11-17 17:36:21,250 [INFO] GBPUSDm   | Bid: 1.32172   | Ask: 1.32182   | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.31948, EMA50=1.32017, RSI=65.3))
+2026-11-17 17:36:21,301 [INFO] USDJPYm   | Bid: 159.242   | Ask: 159.252   | Spread:  1.0p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=44.7)
+2026-11-17 17:36:21,338 [INFO]   -> Skipped USDJPYm: Active position already open on USDJPYm.
+2026-11-17 17:36:21,381 [INFO] AUDUSDm   | Bid: 0.67395   | Ask: 0.67404   | Spread:  0.9p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.67389, EMA50=0.67525, RSI=48.8))
+2026-11-17 17:36:21,451 [INFO] USDCADm   | Bid: 1.4282599999999999 | Ask: 1.42842   | Spread:  1.6p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.42940, EMA50=1.42870, RSI=34.0))
+2026-11-17 17:36:21,476 [INFO] USDCHFm   | Bid: 0.83826   | Ask: 0.83839   | Spread:  1.3p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.83952, EMA50=0.83884, RSI=44.0))
+2026-11-17 17:36:21,478 [INFO] [COMPLETE] Institutional FX risk execution cycle finished cleanly.
+2026-11-17 17:51:50,737 [INFO] Connected to Exness Account #81908061 | Equity: $10,043.92 | Balance: $10,054.68 | Open: 2/3
+2026-11-17 17:51:50,795 [INFO] EURUSDm   | Bid: 1.1014    | Ask: 1.10148   | Spread:  0.8p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.09996, EMA50=1.10123, RSI=55.8))
+2026-11-17 17:51:50,816 [INFO] GBPUSDm   | Bid: 1.32137   | Ask: 1.32147   | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.31944, EMA50=1.32016, RSI=64.0))
+2026-11-17 17:51:50,838 [INFO] USDJPYm   | Bid: 159.224   | Ask: 159.234   | Spread:  1.0p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=44.1)
+2026-11-17 17:51:50,850 [INFO]   -> Skipped USDJPYm: Active position already open on USDJPYm.
+2026-11-17 17:51:50,870 [INFO] AUDUSDm   | Bid: 0.67355   | Ask: 0.67364   | Spread:  0.9p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=44.6)
+2026-11-17 17:51:50,871 [INFO]   -> [CORRELATION GUARD] Skipped AUDUSDm: Max USD exposure (2) reached.
+2026-11-17 17:51:50,893 [INFO] USDCADm   | Bid: 1.4285999999999999 | Ask: 1.42876   | Spread:  1.6p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.42943, EMA50=1.42871, RSI=35.7))
+2026-11-17 17:51:50,913 [INFO] USDCHFm   | Bid: 0.83828   | Ask: 0.83841   | Spread:  1.3p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.83952, EMA50=0.83884, RSI=44.1))
+2026-11-17 17:51:50,914 [INFO] [COMPLETE] Institutional FX risk execution cycle finished cleanly.
+2026-11-17 18:07:16,592 [INFO] Connected to Exness Account #81908061 | Equity: $10,039.14 | Balance: $10,054.68 | Open: 2/3
+2026-11-17 18:07:16,627 [INFO] EURUSDm   | Bid: 1.1013    | Ask: 1.10138   | Spread:  0.8p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.10010, EMA50=1.10125, RSI=53.0))
+2026-11-17 18:07:16,640 [INFO] GBPUSDm   | Bid: 1.32175   | Ask: 1.32185   | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.31968, EMA50=1.32024, RSI=62.8))
+2026-11-17 18:07:16,652 [INFO] USDJPYm   | Bid: 159.316   | Ask: 159.326   | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=159.31224, EMA50=159.44412, RSI=52.4))
+2026-11-17 18:07:16,664 [INFO] AUDUSDm   | Bid: 0.67414   | Ask: 0.67423   | Spread:  0.9p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.67392, EMA50=0.67524, RSI=47.7))
+2026-11-17 18:07:16,676 [INFO] USDCADm   | Bid: 1.42836   | Ask: 1.42852   | Spread:  1.6p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.42931, EMA50=1.42864, RSI=37.2))
+2026-11-17 18:07:16,688 [INFO] USDCHFm   | Bid: 0.83882   | Ask: 0.83895   | Spread:  1.3p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.83948, EMA50=0.83884, RSI=49.0))
+2026-11-17 18:07:16,689 [INFO] [COMPLETE] Institutional FX risk execution cycle finished cleanly.
+2026-11-17 18:22:32,796 [INFO] Connected to Exness Account #81908061 | Equity: $10,040.54 | Balance: $10,054.68 | Open: 2/3
+2026-11-17 18:22:32,828 [INFO] EURUSDm   | Bid: 1.10165   | Ask: 1.10173   | Spread:  0.8p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.10013, EMA50=1.10126, RSI=54.7))
+2026-11-17 18:22:32,845 [INFO] GBPUSDm   | Bid: 1.32214   | Ask: 1.32224   | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.31972, EMA50=1.32025, RSI=64.3))
+2026-11-17 18:22:32,857 [INFO] USDJPYm   | Bid: 159.238   | Ask: 159.248   | Spread:  1.0p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=49.4)
+2026-11-17 18:22:32,858 [INFO]   -> Skipped USDJPYm: Active position already open on USDJPYm.
+2026-11-17 18:22:32,870 [INFO] AUDUSDm   | Bid: 0.67415   | Ask: 0.67424   | Spread:  0.9p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.67392, EMA50=0.67524, RSI=47.8))
+2026-11-17 18:22:32,881 [INFO] USDCADm   | Bid: 1.42856   | Ask: 1.42872   | Spread:  1.6p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.42933, EMA50=1.42865, RSI=39.1))
+2026-11-17 18:22:32,895 [INFO] USDCHFm   | Bid: 0.83875   | Ask: 0.83888   | Spread:  1.3p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.83947, EMA50=0.83884, RSI=48.7))
+2026-11-17 18:22:32,896 [INFO] [COMPLETE] Institutional FX risk execution cycle finished cleanly.
+2026-11-17 18:37:49,101 [INFO] Connected to Exness Account #81908061 | Equity: $10,038.55 | Balance: $10,054.68 | Open: 2/3
+2026-11-17 18:37:49,138 [INFO] EURUSDm   | Bid: 1.10183   | Ask: 1.10191   | Spread:  0.8p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.10015, EMA50=1.10127, RSI=55.5))
+2026-11-17 18:37:49,150 [INFO] GBPUSDm   | Bid: 1.32233   | Ask: 1.32243   | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.31973, EMA50=1.32026, RSI=65.0))
+2026-11-17 18:37:49,163 [INFO] USDJPYm   | Bid: 159.241   | Ask: 159.251   | Spread:  1.0p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=49.5)
+2026-11-17 18:37:49,164 [INFO]   -> Skipped USDJPYm: Active position already open on USDJPYm.
+2026-11-17 18:37:49,178 [INFO] AUDUSDm   | Bid: 0.67422   | Ask: 0.67431   | Spread:  0.9p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.67393, EMA50=0.67524, RSI=48.5))
+2026-11-17 18:37:49,191 [INFO] USDCADm   | Bid: 1.42843   | Ask: 1.42859   | Spread:  1.6p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.42931, EMA50=1.42864, RSI=37.9))
+2026-11-17 18:37:49,203 [INFO] USDCHFm   | Bid: 0.83876   | Ask: 0.83889   | Spread:  1.3p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.83947, EMA50=0.83884, RSI=48.7))
+2026-11-17 18:37:49,204 [INFO] [COMPLETE] Institutional FX risk execution cycle finished cleanly.
+2026-11-17 18:53:04,758 [INFO] Connected to Exness Account #81908061 | Equity: $10,038.98 | Balance: $10,054.68 | Open: 2/3
+2026-11-17 18:53:04,791 [INFO] EURUSDm   | Bid: 1.10185   | Ask: 1.10193   | Spread:  0.8p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.10015, EMA50=1.10127, RSI=55.6))
+2026-11-17 18:53:04,803 [INFO] GBPUSDm   | Bid: 1.3223799999999999 | Ask: 1.32248   | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.31974, EMA50=1.32026, RSI=65.2))
+2026-11-17 18:53:04,813 [INFO] USDJPYm   | Bid: 159.231   | Ask: 159.241   | Spread:  1.0p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=49.2)
+2026-11-17 18:53:04,814 [INFO]   -> Skipped USDJPYm: Active position already open on USDJPYm.
+2026-11-17 18:53:04,824 [INFO] AUDUSDm   | Bid: 0.6741    | Ask: 0.67419   | Spread:  0.9p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.67392, EMA50=0.67524, RSI=47.3))
+2026-11-17 18:53:04,835 [INFO] USDCADm   | Bid: 1.4280300000000001 | Ask: 1.42819   | Spread:  1.6p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.42928, EMA50=1.42863, RSI=35.3))
+2026-11-17 18:53:04,845 [INFO] USDCHFm   | Bid: 0.8387    | Ask: 0.83883   | Spread:  1.3p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.83947, EMA50=0.83884, RSI=48.4))
+2026-11-17 18:53:04,846 [INFO] [COMPLETE] Institutional FX risk execution cycle finished cleanly.
+2026-11-17 19:08:21,689 [INFO] Connected to Exness Account #81908061 | Equity: $10,034.32 | Balance: $10,032.88 | Open: 1/3
+2026-11-17 19:08:21,727 [INFO] EURUSDm   | Bid: 1.10208   | Ask: 1.10216   | Spread:  0.8p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.10034, EMA50=1.10128, RSI=59.4))
+2026-11-17 19:08:21,742 [INFO] GBPUSDm   | Bid: 1.32249   | Ask: 1.32259   | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.32001, EMA50=1.32034, RSI=68.2))
+2026-11-17 19:08:21,758 [INFO] USDJPYm   | Bid: 159.243   | Ask: 159.253   | Spread:  1.0p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=49.7)
+2026-11-17 19:08:21,758 [INFO]   -> Skipped USDJPYm: Active position already open on USDJPYm.
+2026-11-17 19:08:21,773 [INFO] AUDUSDm   | Bid: 0.67422   | Ask: 0.67431   | Spread:  0.9p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.67394, EMA50=0.67517, RSI=51.7))
+2026-11-17 19:08:21,789 [INFO] USDCADm   | Bid: 1.42782   | Ask: 1.42798   | Spread:  1.6p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.42914, EMA50=1.42862, RSI=30.6))
+2026-11-17 19:08:21,806 [INFO] USDCHFm   | Bid: 0.83864   | Ask: 0.83877   | Spread:  1.3p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.83937, EMA50=0.83884, RSI=44.8))
+2026-11-17 19:08:21,806 [INFO] [COMPLETE] Institutional FX risk execution cycle finished cleanly.
+2026-11-17 19:23:38,607 [INFO] Connected to Exness Account #81908061 | Equity: $10,034.51 | Balance: $10,032.88 | Open: 1/3
+2026-11-17 19:23:38,646 [INFO] EURUSDm   | Bid: 1.10184   | Ask: 1.10192   | Spread:  0.8p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.10032, EMA50=1.10127, RSI=58.2))
+2026-11-17 19:23:38,657 [INFO] GBPUSDm   | Bid: 1.32254   | Ask: 1.32264   | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.32001, EMA50=1.32034, RSI=68.4))
+2026-11-17 19:23:38,669 [INFO] USDJPYm   | Bid: 159.24    | Ask: 159.25    | Spread:  1.0p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=49.6)
+2026-11-17 19:23:38,670 [INFO]   -> Skipped USDJPYm: Active position already open on USDJPYm.
+2026-11-17 19:23:38,681 [INFO] AUDUSDm   | Bid: 0.6741    | Ask: 0.67419   | Spread:  0.9p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.67393, EMA50=0.67517, RSI=50.5))
+2026-11-17 19:23:38,692 [INFO] USDCADm   | Bid: 1.42812   | Ask: 1.42828   | Spread:  1.6p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.42917, EMA50=1.42863, RSI=32.3))
+2026-11-17 19:23:38,705 [INFO] USDCHFm   | Bid: 0.83876   | Ask: 0.83889   | Spread:  1.3p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.83939, EMA50=0.83885, RSI=45.4))
+2026-11-17 19:23:38,706 [INFO] [COMPLETE] Institutional FX risk execution cycle finished cleanly.
+2026-11-17 19:38:56,546 [INFO] Connected to Exness Account #81908061 | Equity: $10,031.06 | Balance: $10,032.88 | Open: 1/3
+2026-11-17 19:38:56,577 [INFO] EURUSDm   | Bid: 1.10119   | Ask: 1.10127   | Spread:  0.8p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.10026, EMA50=1.10125, RSI=54.6))
+2026-11-17 19:38:56,589 [INFO] GBPUSDm   | Bid: 1.32195   | Ask: 1.32205   | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.31996, EMA50=1.32032, RSI=64.5))
+2026-11-17 19:38:56,602 [INFO] USDJPYm   | Bid: 159.295   | Ask: 159.305   | Spread:  1.0p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=51.6)
+2026-11-17 19:38:56,602 [INFO]   -> Skipped USDJPYm: Active position already open on USDJPYm.
+2026-11-17 19:38:56,614 [INFO] AUDUSDm   | Bid: 0.67377   | Ask: 0.67386   | Spread:  0.9p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=47.2)
+2026-11-17 19:38:56,726 [INFO]   -> [SUCCESS] FILLED SELL 0.1 AUDUSDm @ 0.67377 | SL: 0.67512 | TP: 0.67107 | Ticket: 577313800
+2026-11-17 19:38:56,759 [INFO] USDCADm   | Bid: 1.42878   | Ask: 1.4289399999999999 | Spread:  1.6p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.42923, EMA50=1.42866, RSI=38.6))
+2026-11-17 19:38:56,771 [INFO] USDCHFm   | Bid: 0.83923   | Ask: 0.83936   | Spread:  1.3p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.83943, EMA50=0.83886, RSI=47.6))
+2026-11-17 19:38:56,772 [INFO] [COMPLETE] Institutional FX risk execution cycle finished cleanly.
+2026-11-17 19:54:14,796 [INFO] Connected to Exness Account #81908061 | Equity: $10,030.58 | Balance: $10,032.88 | Open: 2/3
+2026-11-17 19:54:14,838 [INFO] EURUSDm   | Bid: 1.1014    | Ask: 1.10148   | Spread:  0.8p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.10028, EMA50=1.10126, RSI=55.7))
+2026-11-17 19:54:14,850 [INFO] GBPUSDm   | Bid: 1.3222    | Ask: 1.3223    | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.31998, EMA50=1.32033, RSI=66.2))
+2026-11-17 19:54:14,863 [INFO] USDJPYm   | Bid: 159.274   | Ask: 159.284   | Spread:  1.0p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=50.8)
+2026-11-17 19:54:14,865 [INFO]   -> Skipped USDJPYm: Active position already open on USDJPYm.
+2026-11-17 19:54:14,878 [INFO] AUDUSDm   | Bid: 0.67386   | Ask: 0.67395   | Spread:  0.9p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=48.1)
+2026-11-17 19:54:14,879 [INFO]   -> Skipped AUDUSDm: Active position already open on AUDUSDm.
+2026-11-17 19:54:14,891 [INFO] USDCADm   | Bid: 1.42853   | Ask: 1.42869   | Spread:  1.6p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.42921, EMA50=1.42865, RSI=36.4))
+2026-11-17 19:54:14,905 [INFO] USDCHFm   | Bid: 0.83906   | Ask: 0.83919   | Spread:  1.3p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.83941, EMA50=0.83886, RSI=46.8))
+2026-11-17 19:54:14,906 [INFO] [COMPLETE] Institutional FX risk execution cycle finished cleanly.
+2026-11-17 20:09:31,621 [INFO] Connected to Exness Account #81908061 | Equity: $10,029.54 | Balance: $10,032.88 | Open: 2/3
+2026-11-17 20:09:31,652 [INFO] EURUSDm   | Bid: 1.10119   | Ask: 1.10127   | Spread:  0.8p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.10034, EMA50=1.10123, RSI=50.5))
+2026-11-17 20:09:31,664 [INFO] GBPUSDm   | Bid: 1.32183   | Ask: 1.32193   | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.32013, EMA50=1.32035, RSI=60.1))
+2026-11-17 20:09:31,675 [INFO] USDJPYm   | Bid: 159.316   | Ask: 159.326   | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=159.30692, EMA50=159.43224, RSI=57.8))
+2026-11-17 20:09:31,686 [INFO] AUDUSDm   | Bid: 0.6737    | Ask: 0.67379   | Spread:  0.9p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=46.9)
+2026-11-17 20:09:31,687 [INFO]   -> Skipped AUDUSDm: Active position already open on AUDUSDm.
+2026-11-17 20:09:31,697 [INFO] USDCADm   | Bid: 1.42873   | Ask: 1.42889   | Spread:  1.6p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.42918, EMA50=1.42865, RSI=43.4))
+2026-11-17 20:09:31,708 [INFO] USDCHFm   | Bid: 0.83933   | Ask: 0.83946   | Spread:  1.3p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.83943, EMA50=0.83890, RSI=54.5))
+2026-11-17 20:09:31,709 [INFO] [COMPLETE] Institutional FX risk execution cycle finished cleanly.
+2026-11-17 20:24:49,026 [INFO] Connected to Exness Account #81908061 | Equity: $10,029.68 | Balance: $10,032.88 | Open: 2/3
+2026-11-17 20:24:49,100 [INFO] EURUSDm   | Bid: 1.10099   | Ask: 1.10107   | Spread:  0.8p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.10032, EMA50=1.10122, RSI=49.5))
+2026-11-17 20:24:49,123 [INFO] GBPUSDm   | Bid: 1.32182   | Ask: 1.32192   | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.32013, EMA50=1.32035, RSI=60.0))
+2026-11-17 20:24:49,142 [INFO] USDJPYm   | Bid: 159.309   | Ask: 159.319   | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=159.30626, EMA50=159.43197, RSI=57.5))
+2026-11-17 20:24:49,164 [INFO] AUDUSDm   | Bid: 0.67373   | Ask: 0.67382   | Spread:  0.9p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=47.2)
+2026-11-17 20:24:49,165 [INFO]   -> Skipped AUDUSDm: Active position already open on AUDUSDm.
+2026-11-17 20:24:49,186 [INFO] USDCADm   | Bid: 1.42897   | Ask: 1.42913   | Spread:  1.6p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.42920, EMA50=1.42866, RSI=45.5))
+2026-11-17 20:24:49,204 [INFO] USDCHFm   | Bid: 0.83943   | Ask: 0.83956   | Spread:  1.3p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.83944, EMA50=0.83891, RSI=54.9))
+2026-11-17 20:24:49,205 [INFO] [COMPLETE] Institutional FX risk execution cycle finished cleanly.
+2026-11-18 11:08:38,372 [INFO] Connected to Exness Account #81908061 | Equity: $10,019.89 | Balance: $10,012.89 | Open: 1/3
+2026-11-18 11:08:50,325 [INFO] EURUSDm   | Bid: 1.09758   | Ask: 1.09766   | Spread:  0.8p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=41.2)
+2026-11-18 11:08:50,458 [INFO]   -> [SUCCESS] FILLED SELL 0.1 EURUSDm @ 1.09758 | SL: 1.09978 | TP: 1.09319 | Ticket: 579392617
+2026-11-18 11:08:54,268 [INFO] GBPUSDm   | Bid: 1.31692   | Ask: 1.31702   | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.31890, EMA50=1.31963, RSI=28.1))
+2026-11-18 11:08:55,412 [INFO] USDJPYm   | Bid: 159.279   | Ask: 159.289   | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=159.32666, EMA50=159.45087, RSI=55.1))
+2026-11-18 11:08:57,099 [INFO] AUDUSDm   | Bid: 0.67302   | Ask: 0.67311   | Spread:  0.9p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.67288, EMA50=0.67395, RSI=45.0))
+2026-11-18 11:08:57,685 [INFO] USDCADm   | Bid: 1.43133   | Ask: 1.43149   | Spread:  1.6p | Lots: 0.10 | BUY (Bullish EMA20>EMA50 & RSI=62.0)
+2026-11-18 11:08:57,686 [INFO]   -> [CORRELATION GUARD] Skipped USDCADm: Max USD exposure (2) reached.
+2026-11-18 11:08:58,143 [INFO] USDCHFm   | Bid: 0.84174   | Ask: 0.84187   | Spread:  1.3p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.84062, EMA50=0.83950, RSI=71.4))
+2026-11-18 11:08:58,299 [INFO] [COMPLETE] Institutional FX risk execution cycle finished cleanly.
+2026-11-18 17:29:02,871 [INFO] Connected to Exness Account #81908061 | Equity: $10,050.49 | Balance: $10,039.89 | Open: 1/3
+2026-11-18 17:29:02,989 [INFO] EURUSDm   | Bid: 1.09641   | Ask: 1.09649   | Spread:  0.8p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=34.7)
+2026-11-18 17:29:02,990 [INFO]   -> Skipped EURUSDm: Active position already open on EURUSDm.
+2026-11-18 17:29:03,040 [INFO] GBPUSDm   | Bid: 1.3142    | Ask: 1.3143    | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.31893, EMA50=1.31965, RSI=30.6))
+2026-11-18 17:29:03,102 [INFO] USDJPYm   | Bid: 159.278   | Ask: 159.288   | Spread:  1.0p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=46.6)
+2026-11-18 17:29:04,666 [INFO]   -> [SUCCESS] FILLED SELL 0.1 USDJPYm @ 159.278 | SL: 159.597 | TP: 158.641 | Ticket: 581106044
+2026-11-18 17:29:04,748 [INFO] AUDUSDm   | Bid: 0.67102   | Ask: 0.67111   | Spread:  0.9p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.67288, EMA50=0.67394, RSI=44.5))
+2026-11-18 17:29:04,796 [INFO] USDCADm   | Bid: 1.43302   | Ask: 1.4331800000000001 | Spread:  1.6p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.43073, EMA50=1.42972, RSI=68.5))
+2026-11-18 17:29:04,845 [INFO] USDCHFm   | Bid: 0.84322   | Ask: 0.84335   | Spread:  1.3p | Lots: 0.10 | BUY (Bullish EMA20>EMA50 & RSI=66.9)
+2026-11-18 17:29:04,845 [INFO]   -> [CORRELATION GUARD] Skipped USDCHFm: Max USD exposure (2) reached.
+2026-11-18 17:29:04,846 [INFO] [COMPLETE] Institutional FX risk execution cycle finished cleanly.
+2026-11-19 09:26:12,984 [INFO] Connected to Exness Account #81908061 | Equity: $10,010.40 | Balance: $10,019.90 | Open: 1/3
+2026-11-19 09:26:13,100 [INFO] EURUSDm   | Bid: 1.09843   | Ask: 1.09851   | Spread:  0.8p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.09726, EMA50=1.09812, RSI=54.8))
+2026-11-19 09:26:13,172 [INFO] GBPUSDm   | Bid: 1.31521   | Ask: 1.31531   | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.31893, EMA50=1.31965, RSI=30.6))
+2026-11-19 09:26:13,237 [INFO] USDJPYm   | Bid: 159.743   | Ask: 159.753   | Spread:  1.0p | Lots: 0.10 | SELL (Bearish EMA20<EMA50 & RSI=46.6)
+2026-11-19 09:26:13,522 [INFO]   -> [SUCCESS] FILLED SELL 0.1 USDJPYm @ 159.743 | SL: 160.062 | TP: 159.104 | Ticket: 583225147
+2026-11-19 09:26:13,673 [INFO] AUDUSDm   | Bid: 0.66982   | Ask: 0.66991   | Spread:  0.9p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.67288, EMA50=0.67394, RSI=44.5))
+2026-11-19 09:26:13,723 [INFO] USDCADm   | Bid: 1.4322    | Ask: 1.43236   | Spread:  1.6p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.43073, EMA50=1.42972, RSI=68.5))
+2026-11-19 09:26:13,773 [INFO] USDCHFm   | Bid: 0.84279   | Ask: 0.84292   | Spread:  1.3p | Lots: 0.10 | BUY (Bullish EMA20>EMA50 & RSI=66.9)
+2026-11-19 09:26:13,775 [INFO]   -> [CORRELATION GUARD] Skipped USDCHFm: Max USD exposure (2) reached.
+2026-11-19 09:26:13,776 [INFO] [COMPLETE] Institutional FX risk execution cycle finished cleanly.
+2026-11-20 10:08:23,789 [WARNING] Macro calendar fallback warning: HTTPSConnectionPool(host='www.forexfactory.com', port=443): Read timed out. (read timeout=12)
+2026-11-20 10:08:23,831 [INFO] Connected to Exness Account #81908061 | Equity: $10,037.86 | Balance: $10,037.86 | Open: 0/3
+2026-11-20 10:08:23,946 [INFO] EURUSDm   | Bid: 1.09652   | Ask: 1.0966    | Spread:  0.8p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.09729, EMA50=1.09813, RSI=56.3))
+2026-11-20 10:08:23,985 [INFO] GBPUSDm   | Bid: 1.3101099999999999 | Ask: 1.31021   | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.31496, EMA50=1.31665, RSI=51.2))
+2026-11-20 10:08:24,033 [INFO] USDJPYm   | Bid: 158.948   | Ask: 158.958   | Spread:  1.0p | Lots: 0.10 | HOLD (No trend alignment (EMA20=159.68800, EMA50=159.52489, RSI=83.1))
+2026-11-20 10:08:24,077 [INFO] AUDUSDm   | Bid: 0.66621   | Ask: 0.6663    | Spread:  0.9p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.67018, EMA50=0.67167, RSI=42.4))
+2026-11-20 10:08:24,108 [INFO] USDCADm   | Bid: 1.4322    | Ask: 1.43236   | Spread:  1.6p | Lots: 0.10 | HOLD (No trend alignment (EMA20=1.43288, EMA50=1.43169, RSI=45.4))
+2026-11-20 10:08:24,140 [INFO] USDCHFm   | Bid: 0.84271   | Ask: 0.84284   | Spread:  1.3p | Lots: 0.10 | HOLD (No trend alignment (EMA20=0.84295, EMA50=0.84191, RSI=46.8))
+2026-11-20 10:08:24,141 [INFO] [COMPLETE] Institutional FX risk execution cycle finished cleanly.
+2026-11-20 16:49:54,048 [INFO] [WEEKEND GUARD] Friday >= 15:00 UTC (4:00 PM WAT). Blocking new entries into weekend close.
+2026-11-20 18:08:08,534 [ERROR] MT5 initialization failed: (-10005, 'IPC timeout')
+2026-11-22 14:02:55,002 [WARNING] Macro calendar fallback warning: HTTPSConnectionPool(host='nfs.faireconomy.media', port=443): Max retries exceeded with url: /ff_calendar_thisweek.json (Caused by NameResolutionError("HTTPSConnection(host='nfs.faireconomy.media', port=443): Failed to resolve 'nfs.faireconomy.media' ([Errno 11001] getaddrinfo failed)"))
+2026-11-22 17:29:44,578 [INFO] Connected to Exness Account #81908061 | Equity: $10,037.86 | Balance: $10,037.86 | Open: 0/3
+2026-11-22 17:29:44,660 [INFO] EURUSDm   | Bid: 1.09668   | Spread:  2.0p | HOLD (No trend (ADX=14.7, EMA20=1.09758, EMA50=1.09794, RSI=47.0))
+2026-11-22 17:29:44,661 [INFO] GBPUSDm   | Spread 3.8p > 2.5p max. Skipping.
+2026-11-22 17:29:44,710 [INFO] USDJPYm   | Bid: 158.538   | Spread:  1.8p | HOLD (No trend (ADX=39.8, EMA20=159.35605, EMA50=159.45159, RSI=24.7))
+2026-11-22 17:29:45,133 [WARNING]   -> [REJECTED] AUDUSDm SELL: Code 10018
+2026-11-22 17:29:45,151 [INFO] USDCADm   | Spread 5.5p > 2.5p max. Skipping.
+2026-11-22 17:29:45,194 [INFO] USDCHFm   | Bid: 0.83999   | Spread:  1.3p | HOLD (No trend (ADX=14.5, EMA20=0.84280, EMA50=0.84252, RSI=42.4))
+2026-11-22 17:29:45,195 [INFO] [COMPLETE] Institutional FX risk execution cycle finished cleanly.
+2026-11-23 10:05:39,940 [INFO] Connected to Exness Account #81908061 | Equity: $10,037.86 | Balance: $10,037.86 | Open: 0/3
+2026-11-23 10:05:40,188 [INFO] EURUSDm   | Bid: 1.09847   | Spread:  0.8p | HOLD (No trend (ADX=12.7, EMA20=1.09736, EMA50=1.09769, RSI=45.2))
+2026-11-23 10:05:40,250 [WARNING]   -> [REJECTED] GBPUSDm SELL: Code 10031
+2026-11-23 10:05:40,330 [WARNING]   -> [REJECTED] USDJPYm SELL: Code 10031
+2026-11-23 10:05:40,405 [INFO] AUDUSDm   | Bid: 0.6651    | Spread:  0.9p | HOLD (No trend (ADX=36.1, EMA20=0.66469, EMA50=0.66699, RSI=29.7))
+2026-11-23 10:05:40,461 [INFO] USDCADm   | Bid: 1.4322    | Spread:  1.6p | HOLD (No trend (ADX=15.9, EMA20=1.43252, EMA50=1.43212, RSI=45.1))
+2026-11-23 10:05:40,524 [WARNING]   -> [REJECTED] USDCHFm SELL: Code 10031
+2026-11-23 10:05:40,543 [INFO] [COMPLETE] Institutional FX risk execution cycle finished cleanly.
+2026-11-23 10:36:06,444 [INFO] Connected to Exness Account #81908061 | Equity: $10,037.86 | Balance: $10,037.86 | Open: 0/3
+2026-11-23 10:36:06,518 [INFO] EURUSDm   | Bid: 1.09798   | Spread:  0.8p | HOLD (No trend (ADX=12.7, EMA20=1.09736, EMA50=1.09769, RSI=45.2))
+2026-11-23 10:36:06,792 [INFO]   -> [SUCCESS] FILLED SELL 0.1 GBPUSDm @ 1.31177 | SL: 1.31505 | TP: 1.30521 (Bearish ADX=35.7 & RSI=46.5) | Ticket: 594965478
+2026-11-23 10:36:07,114 [INFO]   -> [SUCCESS] FILLED SELL 0.14 USDJPYm @ 159.155 | SL: 159.553 | TP: 158.359 (Bearish ADX=44.9 & RSI=32.9) | Ticket: 594965487
+2026-11-23 10:36:07,171 [INFO] AUDUSDm   | Bid: 0.66515   | Spread:  0.9p | HOLD (No trend (ADX=36.1, EMA20=0.66469, EMA50=0.66699, RSI=29.7))
+2026-11-23 10:36:07,232 [INFO] USDCADm   | Bid: 1.43201   | Spread:  1.6p | HOLD (No trend (ADX=15.9, EMA20=1.43252, EMA50=1.43212, RSI=45.1))
+2026-11-23 10:36:07,293 [INFO] USDCHFm   | [CORRELATION GUARD] Skipped SELL: Max USD exposure (2) reached.
+2026-11-23 10:36:07,294 [INFO] [COMPLETE] Institutional FX risk execution cycle finished cleanly.
+2026-11-24 10:09:35,700 [INFO] Connected to Exness Account #81908061 | Equity: $10,088.87 | Balance: $10,103.46 | Open: 1/3
+2026-11-24 10:09:36,155 [INFO] EURUSDm   | Bid: 1.09167   | Spread:  0.8p | HOLD (No trend (ADX=19.2, EMA20=1.09807, EMA50=1.09793, RSI=45.9))
+2026-11-24 10:09:36,214 [WARNING]   -> [REJECTED] GBPUSDm SELL: Code 10031
+2026-11-24 10:09:36,283 [INFO] USDJPYm   | Bid: 159.311   | Spread:  1.0p | HOLD (No trend (ADX=18.4, EMA20=159.12978, EMA50=159.10934, RSI=60.5))
+2026-11-24 10:09:36,352 [INFO] AUDUSDm   | Bid: 0.66228   | Spread:  0.9p | HOLD (No trend (ADX=21.0, EMA20=0.66437, EMA50=0.66583, RSI=50.2))
+2026-11-24 10:09:36,405 [INFO] USDCADm   | Bid: 1.4350100000000001 | Spread:  1.6p | HOLD (No trend (ADX=12.2, EMA20=1.43268, EMA50=1.43253, RSI=50.4))
+2026-11-24 10:09:36,474 [WARNING]   -> [REJECTED] USDCHFm SELL: Code 10031
+2026-11-24 10:09:36,484 [INFO] [COMPLETE] Institutional FX risk execution cycle finished cleanly.
+2026-11-24 13:23:55,859 [INFO] Connected to Exness Account #81908061 | Equity: $10,068.53 | Balance: $10,068.53 | Open: 0/3
+2026-11-24 13:23:56,006 [INFO] EURUSDm   | Bid: 1.09558   | Spread:  0.8p | HOLD (No trend (ADX=19.2, EMA20=1.09807, EMA50=1.09793, RSI=45.9))
+2026-11-24 13:23:56,289 [INFO]   -> [SUCCESS] FILLED SELL 0.1 GBPUSDm @ 1.30871 | SL: 1.31198 | TP: 1.30217 (Bearish ADX=23.2 & RSI=35.5) | Ticket: 599515581
+2026-11-24 13:23:56,376 [INFO] USDJPYm   | Bid: 159.14    | Spread:  1.0p | HOLD (No trend (ADX=18.4, EMA20=159.13531, EMA50=159.11161, RSI=63.5))
+2026-11-24 13:23:56,421 [INFO] AUDUSDm   | Bid: 0.66404   | Spread:  0.9p | HOLD (No trend (ADX=21.0, EMA20=0.66437, EMA50=0.66583, RSI=50.2))
+2026-11-24 13:23:56,464 [INFO] USDCADm   | Bid: 1.43279   | Spread:  1.6p | HOLD (No trend (ADX=12.2, EMA20=1.43268, EMA50=1.43253, RSI=50.4))
+2026-11-24 13:23:56,714 [INFO]   -> [SUCCESS] FILLED SELL 0.13 USDCHFm @ 0.83799 | SL: 0.84013 | TP: 0.83371 (Bearish ADX=37.0 & RSI=45.4) | Ticket: 599515594
+2026-11-24 13:23:56,727 [INFO] [COMPLETE] Institutional FX risk execution cycle finished cleanly.
+2026-11-24 14:13:26,283 [INFO] [FQRE v3.0] Account #81908061 | Balance: $10,068.53 | Equity: $10,069.00 | Open: 2/3
+2026-11-24 14:13:26,370 [INFO] EURUSDm   | Bid: 1.09645   | Spread:  0.8p | HOLD (No alignment (ADX=47.6, EMA20=1.09238, EMA50=1.09389, RSI=83.2))
+2026-11-24 14:13:26,417 [INFO] GBPUSDm   | Bid: 1.30979   | Spread:  1.0p | HOLD (No alignment (ADX=46.6, EMA20=1.30545, EMA50=1.30716, RSI=83.7))
+2026-11-24 14:13:26,465 [INFO] USDJPYm   | Bid: 159.004   | Spread:  1.0p | HOLD (Weak trend (ADX=18.8 < 22.0))
+2026-11-24 14:13:26,510 [INFO] AUDUSDm   | Bid: 0.66384   | Spread:  0.9p | HOLD (Weak trend (ADX=19.2 < 22.0))
+2026-11-24 14:13:26,559 [INFO] USDCADm   | Bid: 1.43286   | Spread:  1.6p | HOLD (No alignment (ADX=39.8, EMA20=1.43510, EMA50=1.43451, RSI=20.2))
+2026-11-24 14:13:26,605 [INFO] USDCHFm   | Bid: 0.83707   | Spread:  1.3p | HOLD (No alignment (ADX=33.9, EMA20=0.84100, EMA50=0.84105, RSI=28.5))
+2026-11-24 14:13:26,605 [INFO] [COMPLETE] FQRE v3.0 modular cycle finished cleanly.
+2026-11-24 14:22:39,964 [INFO] [FQRE v3.0] Account #81908061 | Balance: $10,068.53 | Equity: $10,066.60 | Open: 2/3
+2026-11-24 14:22:40,049 [INFO] EURUSDm   | Bid: 1.0962    | Spread:  0.8p | HOLD (No alignment (ADX=46.6, EMA20=1.09272, EMA50=1.09398, RSI=83.9))
+2026-11-24 14:22:40,098 [INFO] GBPUSDm   | Bid: 1.30975   | Spread:  1.0p | HOLD (No alignment (ADX=45.7, EMA20=1.30585, EMA50=1.30726, RSI=86.1))
+2026-11-24 14:22:40,144 [INFO] USDJPYm   | Bid: 159.074   | Spread:  1.0p | HOLD (Weak trend (ADX=19.9 < 22.0))
+2026-11-24 14:22:40,190 [INFO] AUDUSDm   | Bid: 0.66399   | Spread:  0.9p | HOLD (Weak trend (ADX=19.2 < 22.0))
+2026-11-24 14:22:40,239 [INFO] USDCADm   | Bid: 1.43263   | Spread:  1.6p | HOLD (No alignment (ADX=41.8, EMA20=1.43490, EMA50=1.43446, RSI=23.1))
+2026-11-24 14:22:40,285 [INFO] USDCHFm   | Bid: 0.83725   | Spread:  1.3p | HOLD (No alignment (ADX=33.4, EMA20=0.84075, EMA50=0.84095, RSI=24.1))
+2026-11-24 14:22:40,286 [INFO] [COMPLETE] FQRE v3.0 modular cycle finished cleanly.
+2026-11-24 14:27:06,748 [INFO] [FQRE v3.0] Account #81908061 | Balance: $10,068.53 | Equity: $10,059.96 | Open: 2/3
+2026-11-24 14:27:06,813 [INFO] EURUSDm   | Bid: 1.09594   | Spread:  0.8p | HOLD (No alignment (ADX=46.6, EMA20=1.09272, EMA50=1.09398, RSI=83.9))
+2026-11-24 14:27:06,848 [INFO] GBPUSDm   | Bid: 1.30956   | Spread:  1.0p | HOLD (No alignment (ADX=45.7, EMA20=1.30585, EMA50=1.30726, RSI=86.1))
+2026-11-24 14:27:06,882 [INFO] USDJPYm   | Bid: 159.191   | Spread:  1.0p | HOLD (Weak trend (ADX=19.9 < 22.0))
+2026-11-24 14:27:06,916 [INFO] AUDUSDm   | Bid: 0.66422   | Spread:  0.9p | HOLD (Weak trend (ADX=19.2 < 22.0))
+2026-11-24 14:27:06,949 [INFO] USDCADm   | Bid: 1.43232   | Spread:  1.6p | HOLD (No alignment (ADX=41.8, EMA20=1.43490, EMA50=1.43446, RSI=23.1))
+2026-11-24 14:27:06,984 [INFO] USDCHFm   | Bid: 0.8378    | Spread:  1.3p | HOLD (No alignment (ADX=33.4, EMA20=0.84075, EMA50=0.84095, RSI=24.1))
+2026-11-24 14:27:06,984 [INFO] [COMPLETE] FQRE v3.0 modular cycle finished cleanly.
