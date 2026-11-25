@@ -15,7 +15,7 @@ from monitoring.audit import get_platform_logger, record_trade_audit
 
 
 import json
-from telegram_alert import send_telegram_alert
+from email_alert import send_email_alert
 from analytics.performance import summarize_closed_deals
 
 def _sync_snapshot_and_notify(acc, positions, cycle_events):
@@ -40,7 +40,7 @@ def _sync_snapshot_and_notify(acc, positions, cycle_events):
         pass
     for ev in cycle_events:
         if "FILLED" in ev or "BREACH" in ev:
-            send_telegram_alert(f"Account #{acc.login} | Equity: ${acc.equity:,.2f}\n{ev}")
+            send_email_alert(f"[FQRE v3.0 Alert] {ev[:60]}", f"Exness Account #{acc.login}\nCurrent Equity: ${acc.equity:,.2f} | Balance: ${acc.balance:,.2f}\n\nEvent Details:\n{ev}")
 
 def run_fqre_cycle():
     run_fqre_cycle._events = []

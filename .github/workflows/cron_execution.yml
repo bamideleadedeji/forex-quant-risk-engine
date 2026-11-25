@@ -58,8 +58,8 @@ jobs:
           EXNESS_MT5_PASSWORD: ${{ secrets.EXNESS_MT5_PASSWORD }}
           EXNESS_MT5_SERVER: ${{ secrets.EXNESS_MT5_SERVER }}
           FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
         run: |
           $mt5Path = Get-ChildItem -Path "C:\Program Files" -Filter "terminal64.exe" -Recurse -ErrorAction SilentlyContinue |
               Select-Object -ExpandProperty FullName -First 1
