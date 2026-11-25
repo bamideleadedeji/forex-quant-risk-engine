@@ -54,8 +54,7 @@ def run_fqre_cycle():
 
     acc = mt5.account_info()
     if not acc:
-        _sync_snapshot_and_notify(acc, list(mt5.positions_get() or []), getattr(run_fqre_cycle, '_events', []))
-    mt5.shutdown()
+        mt5.shutdown()
         return
 
     positions = list(mt5.positions_get() or [])
@@ -127,6 +126,7 @@ def run_fqre_cycle():
             positions = list(mt5.positions_get() or [])
 
     logger.info("[COMPLETE] FQRE v3.0 modular cycle finished cleanly.")
+    _sync_snapshot_and_notify(acc, list(mt5.positions_get() or []), getattr(run_fqre_cycle, '_events', []))
     mt5.shutdown()
 
 
