@@ -14,7 +14,36 @@ from execution.order_manager import dispatch_protected_order
 from monitoring.audit import get_platform_logger, record_trade_audit
 
 
+import json
+from telegram_alert import send_telegram_alert
+from analytics.performance import summarize_closed_deals
+
+def _sync_snapshot_and_notify(acc, positions, cycle_events):
+    try:
+        deals = mt5.history_deals_get(0, 2147483647) or []
+        closed_rows = [{"profit": d.profit, "symbol": d.symbol, "volume": d.volume} for d in deals if getattr(d, "entry", 0) == 1]
+        stats = summarize_closed_deals(pd.DataFrame(closed_rows), initial_balance=10000.0)
+        snap = {
+            "updated_utc": pd.Timestamp.now("UTC").strftime("%Y-%m-%d %H:%M:%S UTC"),
+            "login": acc.login,
+            "server": acc.server,
+            "balance": float(acc.balance),
+            "equity": float(acc.equity),
+            "free_margin": float(acc.margin_free),
+            "floating_pnl": float(acc.profit),
+            "stats": stats,
+            "positions": [{"Ticket": p.ticket, "Symbol": p.symbol, "Side": "BUY" if p.type == 0 else "SELL", "Lots": p.volume, "Entry": p.price_open, "Current": p.price_current, "SL": p.sl, "TP": p.tp, "PnL_USD": round(p.profit, 2)} for p in positions],
+        }
+        with open("live_account_snapshot.json", "w", encoding="utf-8") as sf:
+            json.dump(snap, sf, indent=2)
+    except Exception:
+        pass
+    for ev in cycle_events:
+        if "FILLED" in ev or "BREACH" in ev:
+            send_telegram_alert(f"Account #{acc.login} | Equity: ${acc.equity:,.2f}\n{ev}")
+
 def run_fqre_cycle():
+    run_fqre_cycle._events = []
     cfg = load_platform_config()
     logger = get_platform_logger(cfg["base_dir"])
     risk_cfg = cfg["risk"]
@@ -25,7 +54,8 @@ def run_fqre_cycle():
 
     acc = mt5.account_info()
     if not acc:
-        mt5.shutdown()
+        _sync_snapshot_and_notify(acc, list(mt5.positions_get() or []), getattr(run_fqre_cycle, '_events', []))
+    mt5.shutdown()
         return
 
     positions = list(mt5.positions_get() or [])

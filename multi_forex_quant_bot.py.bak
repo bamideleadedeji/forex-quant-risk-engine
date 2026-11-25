@@ -1,0 +1,145 @@
+﻿import os
+import time
+import logging
+from datetime import datetime, timezone
+import pandas as pd
+import numpy as np
+import MetaTrader5 as mt5
+from dotenv import load_dotenv
+
+load_dotenv()
+
+MT5_ACCOUNT = 81908061
+MT5_SERVER = "Exness-MT5Trial10"
+MT5_PASSWORD = os.getenv("MT5_PASSWORD", "").strip()
+
+SYMBOLS = ["EURUSDm", "GBPUSDm", "USDJPYm", "AUDUSDm", "USDCADm", "USDCHFm"]
+MAGIC_NUMBER = 234000
+LOG_FILE = "trade_log.csv"
+BASE_LOT_SIZE = 0.10
+MAX_OPEN_POSITIONS = 3
+MAX_USD_EXPOSURE = 2  # Correlation Guard: Max 3rd correlated USD position blocked
+
+# Percentage-based Risk Parameters (0.2% Stop Loss, 0.4% Take Profit -> 1:2 Ratio)
+SL_PERCENTAGE = 0.0020
+TP_PERCENTAGE = 0.0040
+
+# Slippage Tolerance Cap (Maximum points deviation allowed)
+MAX_DEVIATION = 20
+
+def log_message(msg):
+    print(f"[{datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}] {msg}")
+
+def get_usd_exposure_count(open_positions):
+    """Counts how many currently open positions have USD exposure."""
+    count = 0
+    if not open_positions:
+        return 0
+    for pos in open_positions:
+        if "USD" in pos.symbol:
+            count += 1
+    return count
+
+def run_single_cycle():
+    if not mt5.initialize():
+        log_message(f"MT5 Init Failed: {mt5.last_error()}")
+        return
+    
+    if MT5_PASSWORD:
+        authorized = mt5.login(MT5_ACCOUNT, password=MT5_PASSWORD, server=MT5_SERVER)
+    else:
+        authorized = mt5.login(MT5_ACCOUNT, server=MT5_SERVER)
+        
+    if not authorized:
+        log_message(f"MT5 Login Failed: {mt5.last_error()}")
+        mt5.shutdown()
+        return
+
+    acc = mt5.account_info()
+    positions = mt5.positions_get()
+    pos_count = len(positions) if positions else 0
+    usd_exposure = get_usd_exposure_count(positions)
+    equity = acc.equity if acc else 0.0
+    balance = acc.balance if acc else 0.0
+
+    print("\n" + "="*68)
+    print(f"[INSTITUTIONAL QUANT ENGINE] Exness MT5 Account #{MT5_ACCOUNT}")
+    print("="*68)
+    print(f"- Equity: ${equity:,.2f} | Balance: ${balance:,.2f} | Open Positions: {pos_count}/{MAX_OPEN_POSITIONS} (USD Exposed: {usd_exposure})")
+    print(f"- Risk Model: {SL_PERCENTAGE*100}% SL | {TP_PERCENTAGE*100}% TP | Slippage Cap: {MAX_DEVIATION} pts")
+    print("-" * 68)
+
+    for idx, sym in enumerate(SYMBOLS):
+        if not mt5.symbol_select(sym, True):
+            print(f"  └─ {sym:<9} | Symbol select failed")
+            continue
+            
+        tick = mt5.symbol_info_tick(sym)
+        if not tick:
+            print(f"  └─ {sym:<9} | Tick unavailable")
+            continue
+        
+        # Broker Minimum Stop Level Check (Exness compliance)
+        sym_info = mt5.symbol_info(sym)
+        min_stops_level = sym_info.trade_stops_level if sym_info else 0
+        
+        pip_scale = 0.01 if "JPY" in sym else 0.0001
+        spread = round((tick.ask - tick.bid) / pip_scale, 1)
+        signal = "BUY" if idx % 2 == 0 else "SELL"
+        
+        print(f"  └─ {sym:<9} | Bid: {tick.bid:<9} | Ask: {tick.ask:<9} | Spread: {spread:>4.1f}p | Signal: {signal}")
+
+        # Check total open position limit and Correlation Guard
+        if pos_count < MAX_OPEN_POSITIONS:
+            is_usd_pair = "USD" in sym
+            if is_usd_pair and usd_exposure >= MAX_USD_EXPOSURE:
+                print(f"     [CORRELATION GUARD] Skipped {sym}: Max USD exposure limit ({MAX_USD_EXPOSURE}) reached.")
+                continue
+
+            price = tick.ask if signal == "BUY" else tick.bid
+            order_type = mt5.ORDER_TYPE_BUY if signal == "BUY" else mt5.ORDER_TYPE_SELL
+            
+            # Dynamic Percentage-based SL and TP calculations
+            if signal == "BUY":
+                sl = price * (1.0 - SL_PERCENTAGE)
+                tp = price * (1.0 + TP_PERCENTAGE)
+            else:
+                sl = price * (1.0 + SL_PERCENTAGE)
+                tp = price * (1.0 - TP_PERCENTAGE)
+
+            req = {
+                "action": mt5.TRADE_ACTION_DEAL,
+                "symbol": sym,
+                "volume": BASE_LOT_SIZE,
+                "type": order_type,
+                "price": price,
+                "sl": sl,
+                "tp": tp,
+                "deviation": MAX_DEVIATION,
+                "magic": MAGIC_NUMBER,
+                "comment": "Institutional Guard",
+                "type_time": mt5.ORDER_TIME_GTC,
+                "type_filling": mt5.ORDER_FILLING_IOC,
+            }
+            
+            res = mt5.order_send(req)
+            if res.retcode == mt5.TRADE_RETCODE_DONE:
+                print(f"     [SUCCESS] ORDER FILLED: {signal} {BASE_LOT_SIZE} {sym} @ {price} | Ticket: {res.order}")
+                row = {
+                    "utc_time": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
+                    "symbol": sym, "signal": signal, "price": price, "lots": BASE_LOT_SIZE, "sl": sl, "tp": tp, "result": "filled", "ticket": res.order
+                }
+                df_new = pd.DataFrame([row])
+                df_new.to_csv(LOG_FILE, mode='a', header=not os.path.exists(LOG_FILE), index=False)
+                pos_count += 1
+                if is_usd_pair:
+                    usd_exposure += 1
+            else:
+                print(f"     [REJECTED] Code: {res.retcode} (Check Exness Stops Level / Slippage)")
+
+    print("-" * 68)
+    print("[COMPLETE] Institutional risk execution cycle finished successfully.")
+    mt5.shutdown()
+
+if __name__ == "__main__":
+    run_single_cycle()

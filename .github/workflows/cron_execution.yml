@@ -58,6 +58,8 @@ jobs:
           EXNESS_MT5_PASSWORD: ${{ secrets.EXNESS_MT5_PASSWORD }}
           EXNESS_MT5_SERVER: ${{ secrets.EXNESS_MT5_SERVER }}
           FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           $mt5Path = Get-ChildItem -Path "C:\Program Files" -Filter "terminal64.exe" -Recurse -ErrorAction SilentlyContinue |
               Select-Object -ExpandProperty FullName -First 1
@@ -91,3 +93,13 @@ jobs:
           name: trade-log-${{ github.run_id }}
           path: trade_log.csv
           if-no-files-found: ignore
+
+      - name: Sync Live Telemetry & Audit Logs to GitHub
+        if: always()
+        shell: powershell
+        run: |
+          git config user.name "FQRE-Cloud-Runner"
+          git config user.email "bot@://github.com"
+          git add -f live_account_snapshot.json trade_log.csv fqre_rich_audit.csv 2>$null
+          git commit -m "chore(telemetry): automated 24/7 cloud MT5 snapshot & audit sync" 2>$null
+          git push origin master 2>$null

@@ -1,0 +1,3 @@
+Timestamp_UTC,Symbol,Signal,Lots,Entry_Price,Stop_Loss,Take_Profit,ATR14,ADX14,RSI,Spread_Pips,Confidence,Risk_Pct,Status,Ticket,Audit_Trail
+2026-11-25 08:50:22,USDCHFm,SELL,0.0,0.8342,,,0.0006957142857142677,65.8,47.6,1.3,0.95,0.0035,RISK_BLOCKED,0,Session/Weekend Filter = PASS -> News Filter = PASS -> Spread Filter = PASS (1.3p) -> Drawdown Guard = PASS (0.00%) -> Portfolio Cap = BLOCKED (Open: 1/3)
+2026-11-25 16:17:45,USDCHFm,SELL,0.14,0.83168,0.83376,0.82752,0.0008499999999999856,63.4,36.1,1.3,0.95,0.0035,FILLED,604851908,Session/Weekend Filter = PASS -> News Filter = PASS -> Spread Filter = PASS (1.3p) -> Drawdown Guard = PASS (0.00%) -> Portfolio Cap = PASS (0/3) -> Correlation Guard = PASS (USD 0/2) -> Margin Guard = PASS
