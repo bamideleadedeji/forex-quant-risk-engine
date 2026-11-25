@@ -7,7 +7,7 @@ from email.message import EmailMessage
 def send_email_alert(subject: str, body: str) -> None:
     """Sends instant trade and risk alerts via Gmail SMTP SSL."""
     sender = os.environ.get("GMAIL_USER", "bamideleadedeji2000@gmail.com").strip()
-    app_password = os.environ.get("GMAIL_APP_PASSWORD", "").strip()
+    app_password = os.environ.get("GMAIL_APP_PASSWORD", "").replace(" ", "").strip()
     recipient = os.environ.get("ALERT_EMAIL_TO", sender).strip()
 
     if not sender or not app_password:
