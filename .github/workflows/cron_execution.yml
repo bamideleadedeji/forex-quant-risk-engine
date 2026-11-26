@@ -98,8 +98,13 @@ jobs:
         if: always()
         shell: powershell
         run: |
+          $ErrorActionPreference = "Continue"
           git config user.name "FQRE-Cloud-Runner"
           git config user.email "bot@://github.com"
-          git add -f live_account_snapshot.json trade_log.csv fqre_rich_audit.csv 2>$null
-          git commit -m "chore(telemetry): automated 24/7 cloud MT5 snapshot & audit sync" 2>$null
-          git push origin master 2>$null
+          git add -f live_account_snapshot.json trade_log.csv fqre_rich_audit.csv *> $null
+          $changes = git diff --cached --name-only
+          if ($changes) {
+            git commit -m "chore(telemetry): automated 24/7 cloud MT5 snapshot & audit sync" *> $null
+            git push origin master *> $null
+          }
+          exit 0
