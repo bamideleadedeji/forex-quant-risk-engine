@@ -1,18 +1,41 @@
 {
-  "updated_utc": "2026-11-25 13:15:01 UTC",
+  "updated_utc": "2026-11-27 10:53:59 UTC",
   "login": 81908061,
   "server": "Exness-MT5Trial10",
-  "balance": 10102.57,
-  "equity": 10102.57,
-  "free_margin": 10102.57,
-  "floating_pnl": 0.0,
+  "balance": 10032.68,
+  "equity": 10024.83,
+  "free_margin": 9884.79,
+  "floating_pnl": -7.85,
   "stats": {
-    "trades": 19,
-    "win_rate_pct": 42.11,
-    "profit_factor": 1.24,
-    "net_pnl": 102.57,
-    "sharpe": 1.08,
+    "trades": 21,
+    "win_rate_pct": 38.1,
+    "profit_factor": 1.07,
+    "net_pnl": 32.68,
+    "sharpe": 0.32,
     "max_dd_pct": 2.27
   },
-  "positions": []
+  "positions": [
+    {
+      "Ticket": 610637764,
+      "Symbol": "USDJPYm",
+      "Side": "SELL",
+      "Lots": 0.14,
+      "Entry": 159.357,
+      "Current": 159.527,
+      "SL": 159.755,
+      "TP": 158.56,
+      "PnL_USD": -14.92
+    },
+    {
+      "Ticket": 610637773,
+      "Symbol": "AUDUSDm",
+      "Side": "BUY",
+      "Lots": 0.21,
+      "Entry": 0.667,
+      "Current": 0.66733,
+      "SL": 0.66533,
+      "TP": 0.67033,
+      "PnL_USD": 6.93
+    }
+  ]
 }

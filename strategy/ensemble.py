@@ -25,12 +25,15 @@ def compute_indicators(df: pd.DataFrame) -> pd.DataFrame:
     minus_dm = np.where((down_move > up_move) & (down_move > 0), down_move, 0.0)
     plus_di = 100.0 * pd.Series(plus_dm, index=work.index).rolling(14).mean() / work["atr14"].replace(0, np.nan)
     minus_di = 100.0 * pd.Series(minus_dm, index=work.index).rolling(14).mean() / work["atr14"].replace(0, np.nan)
-    dx = (100.0 * (plus_di - minus_di).abs() / (plus_di + minus_di).replace(0, np.nan))
+    dx = 100.0 * (plus_di - minus_di).abs() / (plus_di + minus_di).replace(0, np.nan)
+    work["plus_di"] = plus_di
+    work["minus_di"] = minus_di
     work["adx14"] = dx.rolling(14).mean()
     return work
 
 
-def generate_ensemble_signal(df: pd.DataFrame, min_adx: float = 22.0) -> dict:
+def generate_ensemble_signal(df: pd.DataFrame, min_adx: float = 25.0, df_h4: pd.DataFrame | None = None) -> dict:
+    eff_adx = max(float(min_adx), 25.0)
     if df.empty or len(df) < 60:
         return {"signal": "HOLD", "confidence": 0.0, "atr14": 0.0, "adx14": 0.0, "rsi": 50.0, "reason": "Insufficient bars"}
 
@@ -41,16 +44,27 @@ def generate_ensemble_signal(df: pd.DataFrame, min_adx: float = 22.0) -> dict:
     adx = float(ind["adx14"]) if pd.notna(ind["adx14"]) else 0.0
     rsi = float(ind["rsi"]) if pd.notna(ind["rsi"]) else 50.0
     atr = float(ind["atr14"]) if pd.notna(ind["atr14"]) else 0.0
+    p_di = float(ind["plus_di"]) if pd.notna(ind["plus_di"]) else 0.0
+    m_di = float(ind["minus_di"]) if pd.notna(ind["minus_di"]) else 0.0
 
-    if adx < min_adx or atr <= 0:
-        return {"signal": "HOLD", "confidence": 0.0, "atr14": atr, "adx14": round(adx, 1), "rsi": round(rsi, 1), "reason": f"Weak trend (ADX={adx:.1f} < {min_adx})"}
+    if adx < eff_adx or atr <= 0:
+        return {"signal": "HOLD", "confidence": 0.0, "atr14": atr, "adx14": round(adx, 1), "rsi": round(rsi, 1), "reason": f"Weak trend (ADX={adx:.1f} < {eff_adx:.1f})"}
 
-    if close_px > ema20 > ema50 and 48.0 <= rsi <= 68.0:
-        conf = min(0.95, round(0.55 + (adx - min_adx) * 0.015, 2))
-        return {"signal": "BUY", "confidence": conf, "atr14": atr, "adx14": round(adx, 1), "rsi": round(rsi, 1), "reason": f"Bullish Trend (ADX={adx:.1f}, RSI={rsi:.1f})"}
+    h4_bias = "BOTH"
+    if df_h4 is not None and not df_h4.empty and len(df_h4) >= 55:
+        h4_ind = compute_indicators(df_h4).iloc[-2]
+        h4_bias = "BULL" if float(h4_ind["close"]) > float(h4_ind["ema50"]) else "BEAR"
 
-    if close_px < ema20 < ema50 and 32.0 <= rsi <= 52.0:
-        conf = min(0.95, round(0.55 + (adx - min_adx) * 0.015, 2))
-        return {"signal": "SELL", "confidence": conf, "atr14": atr, "adx14": round(adx, 1), "rsi": round(rsi, 1), "reason": f"Bearish Trend (ADX={adx:.1f}, RSI={rsi:.1f})"}
+    if close_px > ema20 > ema50 and p_di > m_di and 50.0 <= rsi <= 66.0:
+        if h4_bias == "BEAR":
+            return {"signal": "HOLD", "confidence": 0.0, "atr14": atr, "adx14": round(adx, 1), "rsi": round(rsi, 1), "reason": "Blocked: H1 Bullish vs H4 Bearish"}
+        conf = min(0.95, round(0.60 + (adx - eff_adx) * 0.015, 2))
+        return {"signal": "BUY", "confidence": conf, "atr14": atr, "adx14": round(adx, 1), "rsi": round(rsi, 1), "reason": f"H1+H4 Bullish (ADX={adx:.1f}, +DI>{m_di:.0f}, RSI={rsi:.1f})"}
 
-    return {"signal": "HOLD", "confidence": 0.0, "atr14": atr, "adx14": round(adx, 1), "rsi": round(rsi, 1), "reason": f"No alignment (ADX={adx:.1f}, EMA20={ema20:.5f}, EMA50={ema50:.5f}, RSI={rsi:.1f})"}
+    if close_px < ema20 < ema50 and m_di > p_di and 34.0 <= rsi <= 50.0:
+        if h4_bias == "BULL":
+            return {"signal": "HOLD", "confidence": 0.0, "atr14": atr, "adx14": round(adx, 1), "rsi": round(rsi, 1), "reason": "Blocked: H1 Bearish vs H4 Bullish"}
+        conf = min(0.95, round(0.60 + (adx - eff_adx) * 0.015, 2))
+        return {"signal": "SELL", "confidence": conf, "atr14": atr, "adx14": round(adx, 1), "rsi": round(rsi, 1), "reason": f"H1+H4 Bearish (ADX={adx:.1f}, -DI>{p_di:.0f}, RSI={rsi:.1f})"}
+
+    return {"signal": "HOLD", "confidence": 0.0, "atr14": atr, "adx14": round(adx, 1), "rsi": round(rsi, 1), "reason": f"No alignment (ADX={adx:.1f}, +DI={p_di:.0f}/-DI={m_di:.0f}, RSI={rsi:.1f})"}
