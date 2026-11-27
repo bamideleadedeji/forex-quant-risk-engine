@@ -14,13 +14,13 @@ symbols:
 
 risk:
   risk_per_trade_pct: 0.0035
-  max_open_positions: 3
+  max_open_positions: 2
   max_usd_exposure: 2
   max_daily_loss_pct: 0.02
   max_drawdown_pct: 0.08
   max_spread_pips: 2.5
   atr_sl_multiplier: 1.8
   atr_tp_multiplier: 3.6
-  min_adx_trend: 22.0
+  min_adx_trend: 25.0
   news_blackout_minutes: 60
   friday_cutoff_hour_utc: 15
