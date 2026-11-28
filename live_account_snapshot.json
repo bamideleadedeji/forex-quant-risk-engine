@@ -1,17 +1,17 @@
 {
-  "updated_utc": "2026-11-27 10:53:59 UTC",
+  "updated_utc": "2026-11-28 10:18:06 UTC",
   "login": 81908061,
   "server": "Exness-MT5Trial10",
-  "balance": 10032.68,
-  "equity": 10024.83,
-  "free_margin": 9884.79,
-  "floating_pnl": -7.85,
+  "balance": 9997.61,
+  "equity": 9975.67,
+  "free_margin": 9905.67,
+  "floating_pnl": -21.94,
   "stats": {
-    "trades": 21,
-    "win_rate_pct": 38.1,
-    "profit_factor": 1.07,
-    "net_pnl": 32.68,
-    "sharpe": 0.32,
+    "trades": 22,
+    "win_rate_pct": 36.36,
+    "profit_factor": 1.0,
+    "net_pnl": -2.39,
+    "sharpe": -0.02,
     "max_dd_pct": 2.27
   },
   "positions": [
@@ -21,21 +21,10 @@
       "Side": "SELL",
       "Lots": 0.14,
       "Entry": 159.357,
-      "Current": 159.527,
+      "Current": 159.607,
       "SL": 159.755,
       "TP": 158.56,
-      "PnL_USD": -14.92
-    },
-    {
-      "Ticket": 610637773,
-      "Symbol": "AUDUSDm",
-      "Side": "BUY",
-      "Lots": 0.21,
-      "Entry": 0.667,
-      "Current": 0.66733,
-      "SL": 0.66533,
-      "TP": 0.67033,
-      "PnL_USD": 6.93
+      "PnL_USD": -21.94
     }
   ]
 }

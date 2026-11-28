@@ -1,4 +1,5 @@
 ﻿import json
+from datetime import datetime, timezone
 import pandas as pd
 import MetaTrader5 as mt5
 from config.credentials import load_platform_config
@@ -7,7 +8,7 @@ from market_data.news_filter import check_high_impact_news
 from strategy.ensemble import generate_ensemble_signal
 from risk.position_size import compute_dynamic_lot_size
 from risk.gatekeeper import evaluate_risk_gate
-from execution.order_manager import dispatch_protected_order, manage_open_positions
+from execution.order_manager import dispatch_protected_order, manage_open_positions, close_positions_before_weekend, compute_intraday_sl_tp
 from monitoring.audit import get_platform_logger, record_trade_audit
 from email_alert import send_email_alert
 from analytics.performance import summarize_closed_deals
@@ -20,12 +21,9 @@ def _sync_snapshot_and_notify(acc, positions, cycle_events):
         stats = summarize_closed_deals(pd.DataFrame(closed_rows), initial_balance=10000.0)
         snap = {
             "updated_utc": pd.Timestamp.now("UTC").strftime("%Y-%m-%d %H:%M:%S UTC"),
-            "login": acc.login,
-            "server": acc.server,
-            "balance": float(acc.balance),
-            "equity": float(acc.equity),
-            "free_margin": float(acc.margin_free),
-            "floating_pnl": float(acc.profit),
+            "login": acc.login, "server": acc.server,
+            "balance": float(acc.balance), "equity": float(acc.equity),
+            "free_margin": float(acc.margin_free), "floating_pnl": float(acc.profit),
             "stats": stats,
             "positions": [{"Ticket": p.ticket, "Symbol": p.symbol, "Side": "BUY" if p.type == 0 else "SELL", "Lots": p.volume, "Entry": p.price_open, "Current": p.price_current, "SL": p.sl, "TP": p.tp, "PnL_USD": round(p.profit, 2)} for p in positions],
         }
@@ -34,8 +32,8 @@ def _sync_snapshot_and_notify(acc, positions, cycle_events):
     except Exception:
         pass
     for ev in cycle_events:
-        if any(k in ev for k in ("FILLED", "BREACH", "BREAK-EVEN", "TRAILED")):
-            send_email_alert(f"[FQRE v3.1 Alert] {ev[:60]}", f"Exness Account #{acc.login}\nCurrent Equity: ${acc.equity:,.2f} | Balance: ${acc.balance:,.2f}\n\nEvent Details:\n{ev}")
+        if any(k in ev for k in ("FILLED", "BREACH", "BREAK-EVEN", "TRAILED", "WEEKEND")):
+            send_email_alert(f"[FQRE v3.2 Alert] {ev[:60]}", f"Exness Account #{acc.login}\nEquity: ${acc.equity:,.2f} | Balance: ${acc.balance:,.2f}\n\n{ev}")
 
 
 def run_fqre_cycle():
@@ -43,6 +41,7 @@ def run_fqre_cycle():
     cfg = load_platform_config()
     logger = get_platform_logger(cfg["base_dir"])
     risk_cfg = cfg["risk"]
+    now_utc = datetime.now(timezone.utc)
 
     if not connect_mt5_with_retry(cfg, wait_seconds=15):
         logger.warning("MT5 terminal not connected after 15s wait. Exiting cycle cleanly.")
@@ -54,10 +53,19 @@ def run_fqre_cycle():
         return
 
     positions = list(mt5.positions_get() or [])
-    logger.info(f"[FQRE v3.1] Account #{acc.login} | Balance: ${acc.balance:,.2f} | Equity: ${acc.equity:,.2f} | Open: {len(positions)}/2")
+    logger.info(f"[FQRE v3.2] Account #{acc.login} | Balance: ${acc.balance:,.2f} | Equity: ${acc.equity:,.2f} | Open: {len(positions)}/2")
 
+    # Step 1: Friday >= 18:30 UTC Weekend Flat Protection
+    if now_utc.weekday() == 4 and (now_utc.hour > 18 or (now_utc.hour == 18 and now_utc.minute >= 30)) and positions:
+        events.extend(close_positions_before_weekend(positions, logger))
+        positions = list(mt5.positions_get() or [])
+
+    # Step 2: Early Profit-Lock Trailing (+0.5R -> BE, +1.0R -> +0.5R, +1.5R -> +1.0R)
     events.extend(manage_open_positions(positions, logger))
     positions = list(mt5.positions_get() or [])
+
+    # Cap per-trade risk at 0.20% (~$20 max loss, matching winning Nov 20 sizing)
+    effective_risk_pct = min(float(risk_cfg.get("risk_per_trade_pct", 0.002)), 0.0020)
 
     for sym in cfg["symbols"]:
         df_h1 = fetch_ohlcv_bars(sym, timeframe=mt5.TIMEFRAME_H1, count=150)
@@ -88,17 +96,17 @@ def run_fqre_cycle():
             record_trade_audit(cfg["base_dir"], {
                 "Symbol": sym, "Signal": sig["signal"], "Lots": 0.0, "Entry_Price": tick.bid,
                 "ATR14": sig["atr14"], "ADX14": sig["adx14"], "RSI": sig["rsi"], "Spread_Pips": round(spread_pips, 2),
-                "Confidence": sig["confidence"], "Risk_Pct": risk_cfg["risk_per_trade_pct"],
+                "Confidence": sig["confidence"], "Risk_Pct": effective_risk_pct,
                 "Status": "RISK_BLOCKED", "Ticket": 0, "Audit_Trail": trail_str
             })
             continue
 
-        min_stop = (s_info.trade_stops_level + 10) * s_info.point
-        sl_dist = max(sig["atr14"] * float(risk_cfg["atr_sl_multiplier"]), min_stop)
+        exec_px = tick.ask if sig["signal"] == "BUY" else tick.bid
+        sl_dist, _, _ = compute_intraday_sl_tp(sym, sig["signal"], exec_px, sig["atr14"], s_info)
         lots = compute_dynamic_lot_size(
             equity=float(acc.equity), sl_distance=sl_dist,
             tick_size=float(s_info.trade_tick_size), tick_value=float(s_info.trade_tick_value),
-            risk_pct=float(risk_cfg["risk_per_trade_pct"]),
+            risk_pct=effective_risk_pct,
             vol_min=float(s_info.volume_min), vol_max=float(s_info.volume_max), vol_step=float(s_info.volume_step),
         )
 
@@ -108,14 +116,14 @@ def run_fqre_cycle():
             "Symbol": sym, "Signal": sig["signal"], "Lots": lots, "Entry_Price": exec_res["price"],
             "Stop_Loss": exec_res["sl"], "Take_Profit": exec_res["tp"], "ATR14": sig["atr14"],
             "ADX14": sig["adx14"], "RSI": sig["rsi"], "Spread_Pips": round(spread_pips, 2),
-            "Confidence": sig["confidence"], "Risk_Pct": risk_cfg["risk_per_trade_pct"],
+            "Confidence": sig["confidence"], "Risk_Pct": effective_risk_pct,
             "Status": exec_res["status"], "Ticket": exec_res["ticket"], "Audit_Trail": trail_str
         })
         if exec_res["status"] == "FILLED":
             events.append(f"{sym} FILLED {sig['signal']} {lots} lots @ {exec_res['price']} | SL: {exec_res['sl']} | TP: {exec_res['tp']}")
             positions = list(mt5.positions_get() or [])
 
-    logger.info("[COMPLETE] FQRE v3.1 institutional cycle finished cleanly.")
+    logger.info("[COMPLETE] FQRE v3.2 profit-lock cycle finished cleanly.")
     _sync_snapshot_and_notify(acc, list(mt5.positions_get() or []), events)
     mt5.shutdown()
 
